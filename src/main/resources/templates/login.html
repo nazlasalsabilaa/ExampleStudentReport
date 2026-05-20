@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width-device-width, initial-scale=1.0">
+    <title>Login - Student Report</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+
+<body class="login-body">
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+
+        <div class="card shadow-sm p-4 border-0 w-100" style="max-width: 380px; border-radius: 8px;">
+
+            <div class="text-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <h1 class="brand-title">STUDENT REPORT</h1>
+                <p class="text-muted" style="font-size: 0.8rem;">Sistem Pelaporan Kerusakan Fasilitas Kampus</p>
+            </div>
+
+            <form th:action="@{/login}" method="post">
+
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold text-dark" style="font-size: 0.85rem;">Email</label>
+                    <input type="email" class="form-control py-2" id="email" name="email" placeholder="nim@mhs.ulm.ac.id" required>
+                </div>
+            
+            <div class="mb-1">
+                <label for="password" class="form-label fw-semibold text-dark" style="font-size: 0.85rem;">Kata Sandi</label>
+                <div class="input-group">
+                    <input type="password" class="form-control py-2 border-end-0" id="password" name="password" placeholder="Masukkan kata sandi" required>
+                    <span class="input-group-text bg-white border-start-0 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+
+            <div class="text-end mb-4 mt-1">
+                <a href="#" class="text-decoration-none" style="font-size: 0.75rem;">Lupa kata sandi?</a>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100 fw-bold mb-3 py-2">Masuk</button>
+        </form>
+
+        <div class="text-center" style="font-size: 0.85rem;">
+            <span class="text-muted">Belum punya akun?</span>
+            <a href="#" class="text-decoration-none fw-bold">Daftar di sini</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
