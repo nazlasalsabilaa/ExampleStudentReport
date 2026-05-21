@@ -49,6 +49,17 @@
                             </div>
 
                             <div class="mb-4">
+                                <label for="title" class="form-label fw-bold text-dark d-flex align-items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    Judul Laporan<span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control py-2" id="title" name="title" placeholder="Contoh: AC Mati, Proyektor Rusak" required>
+                            </div>
+
+                            <div class="mb-4">
                                 <label for="kategori" class="form-label fw-bold text-dark d-flex align-items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
@@ -59,9 +70,9 @@
                                 <select class="form-select py-2 text-muted" id="kategori" name="categoryId" required>
                                     <option selected disabled value="">Pilih Kategori Kerusakan</option>
                                     <option
-                                            th:each="cat : ${listKategori}"
-                                            th:value="${cat.id}"
-                                            th:text="${cat.name}">Nama Kategori</option>
+                                            th:each="category : ${categories}"
+                                            th:value="${category.id}"
+                                            th:text="${category.name}">Nama Kategori</option>
                                 </select>
                             </div>
 
@@ -78,16 +89,16 @@
                                         <select class="form-select py-2 text-muted" name="roomId" required>
                                             <option selected disabled value="">Pilih Ruangan</option>
                                             <option
-                                                th:each="ruang : ${listRuangan}"
-                                                th:value="${ruang.id}"
-                                                th:text="${ruang.name} + ' (Lantai ' + ${ruang.floor} +')'">Nama Ruangan</option>
+                                                th:each="room : ${rooms}"
+                                                th:value="${room.id}"
+                                                th:text="${room.name} + ' (Lantai ' + ${room.floor} +')'">Nama Ruangan</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="mb-4">
-                                <label for="deskripsi" class="form-label fw-bold text-dark d-flex align-items-center gap-2">
+                                <label for="description" class="form-label fw-bold text-dark d-flex align-items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                         <polyline points="14 2 14 8 20 8"></polyline>
@@ -97,7 +108,7 @@
                                     </svg>
                                     Deskripsi Kerusakan<span class="text-danger">*</span>
                                 </label>
-                                <textarea class="form-control py-2" id="deskripsi" name="deskripsi" rows="4" placeholder="Jelaskan kondisi kerusakan dengan detail." required></textarea>
+                                <textarea class="form-control py-2" id="description" name="description" rows="4" placeholder="Jelaskan kondisi kerusakan dengan detail." required></textarea>
                             </div>
 
                             <div class="d-flex justify-content-end gap-3 mt-5">

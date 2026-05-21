@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="report-card(report)" class="col-12 col-md-4">
+    <div class="card h-100 border-0 bg-light p-2" style="border-radius: 8px;">
+        <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center" style="height: 140px;">
+            <svg width="48" height="48" fill="#9ca3af" viewBox="0 0 24 24">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1-0 2-.9 2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+        </div>
+        <div class="card-body px-1 py-3 text-center">
+            <h4 class="h6 fw-extrabold text-dark mb-2 text-uppercase" style="letter-spacing: 0.5px;" th:text="${report.title ?: 'AC'}">NAMA FASILITAS</h4>
+            <p class="text-muted small mb-2 d-flex align-items-center justify-content-center gap-1 px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span th:text="${report.room != null ? (report.room.name + ' - Lantai ' + report.room.floor) : 'Ruang A201 - Lantai 2'}">Lokasi Ruangan</span>
+            </p>
+            <p class="text-muted small mb-0" th:text="${report.description ?: 'AC mengalami kebocoran saat digunakan.'}">Deskripsi kerusakan...</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -50,10 +50,10 @@
     <div class="p-3 border-top bg-light-subtle">
         <div class="d-flex align-items-center gap-2 mb-3 px-2">
             <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 32px; height: 32px; font-size: 0.8rem;">
-                <span th:text="${user?.nama?.substring(0,1) ?: 'U'}">U</span>
+                <span th:text="${user?.name?.substring(0,1) ?: 'U'}">U</span>
             </div>
             <div class="overflow-hidden">
-                <p class="fw-bold text-dark mb-0 style-name" style="font-size: 0.85rem;" th:text="${user?.nama ?: 'Nama User'}">Nama User</p>
+                <p class="fw-bold text-dark mb-0 style-name" style="font-size: 0.85rem;" th:text="${user?.name ?: 'Nama User'}">Nama User</p>
                 <p class="text-muted mb-0 style-email" style="font-size: 0.75rem;" th:text="${user?.email ?: 'nim@mhs.ulm.ac.id'}">nim@mhs.ulm.ac.id</p>
             </div>
         </div>

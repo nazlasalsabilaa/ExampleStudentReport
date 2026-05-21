@@ -25,34 +25,59 @@
                 </div>
             </div>
 
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-4">
+                    <div class="bg-white p-3 shadow-sm text-center d-flex flex-column justify-content-center align-items-center h-100" style="border-radius: 12px; border: 1.5px solid #A2D2FF;">
+                        <p class="fw-bold mb-2 text-dark text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">JUMLAH LAPORAN SAYA</p>
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            <h2 class="fw-bold mb-0 text-dark" style="font-size: 2.2rem;" th:text="${userStats?.reportCount ?: '3'}">3</h2>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d6efd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="bg-white p-3 shadow-sm text-center d-flex flex-column justify-content-center align-items-center h-100" style="border-radius: 12px; border: 1.5px solid #ffda6a;">
+                        <p class="fw-bold mb-2 text-dark text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">LAPORAN DIPROSES</p>
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            <h2 class="fw-bold mb-0 text-dark" style="font-size: 2.2rem;" th:text="${userStats?.pendingReport ?: '1'}">1</h2>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffc107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="bg-white p-3 shadow-sm text-center d-flex flex-column justify-content-center align-items-center h-100" style="border-radius: 12px; border: 1.5px solid #75b798;">
+                        <p class="fw-bold mb-2 text-dark text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">LAPORAN SELESAI</p>
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            <h2 class="fw-bold mb-0 text-dark" style="font-size: 2.2rem;" th:text="${userStats?.completedReport ?: '2'}">2</h2>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white p-4 shadow-sm" style="border-radius: 12px;">
                 <h3 class="h5 fw-bold text-dark mb-4">Laporan Terbaru</h3>
 
                 <div class="row g-4">
-                    <div th:if="${#lists.isEmpty(laporanTerbaru)}" class="col-12 text-center text-muted py-3">
+                    <div th:if="${#lists.isEmpty(recentReports)}" class="col-12 text-center text-muted py-3">
                         Belum ada laporan yang diajukan.
                     </div>
 
-                    <div class="col-12 col-md-4" th:each="laporan: ${laporanTerbaru}">
-                        <div class="card h-100 border-0 bg-light p-2" style="border-radius: 8px;">
-                            <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center" style="height: 140px;">
-                                <svg width="48" height="48" fill="#9ca3af" viewBox="0 0 24 24">
-                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1-0 2-.9 2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                                </svg>
-                            </div>
-                            <div class="card-body px-1 py-3 text-center">
-                                <h4 class="h6 fw-extrabold text-dark mb-2" style="letter-spacing: 0.5px;" th:text="${laporan.namaFasilitas}">NAMA FASILITAS</h4>
-                                <p class="text-muted small mb-2 d-flex align-items-center justify-content-center gap-1 px-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                        <circle cx="12" cy="10" r="3"></circle>
-                                    </svg>
-                                    <span>Lokasi Ruangan</span>
-                                </p>
-                                <p>Deskripsi kerusakan...</p>
-                            </div>
-                        </div>
-                    </div>
+                    <div th:replace="~{fragments/card :: report-card(report=${report})}" th:each="report: ${recentReports}"></div>
                 </div>
             </div>
         </main>
