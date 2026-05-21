@@ -56,12 +56,12 @@
                                     </svg>
                                     Kategori Kerusakan<span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select py-2 text-muted" id="kategori" name="kategori" required>
+                                <select class="form-select py-2 text-muted" id="kategori" name="categoryId" required>
                                     <option selected disabled value="">Pilih Kategori Kerusakan</option>
-                                    <option value="ELEKTRONIK">Alat Elektronik (AC, Proyektor, dll)</option>
-                                    <option value="FURNITUR">Furnitur (Meja, Kursi, Papan Tulis)</option>
-                                    <option value="INFRASTRUKTUR">Infrastruktur (Atap Bocor, Pintu Rusak)</option>
-                                    <option value="SANITASI">Sanitasi (Wastafel, Toilet)</option>
+                                    <option
+                                            th:each="cat : ${listKategori}"
+                                            th:value="${cat.id}"
+                                            th:text="${cat.name}">Nama Kategori</option>
                                 </select>
                             </div>
 
@@ -75,14 +75,12 @@
                                 </label>
                                 <div class="row g-3 mb-3">
                                     <div class="col-12 col-md-6">
-                                        <input type="text" class="form-control py-2" placeholder="Nama Program Studi" name="programStudi" required>
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <select class="form-select py-2 text-muted" name="lantai" required>
-                                            <option selected disabled value="">Pilih Lantai</option>
-                                            <option value="1">Lantai 1</option>
-                                            <option value="2">Lantai 2</option>
-                                            <option value="3">Lantai 3</option>
+                                        <select class="form-select py-2 text-muted" name="roomId" required>
+                                            <option selected disabled value="">Pilih Ruangan</option>
+                                            <option
+                                                th:each="ruang : ${listRuangan}"
+                                                th:value="${ruang.id}"
+                                                th:text="${ruang.name} + ' (Lantai ' + ${ruang.floor} +')'">Nama Ruangan</option>
                                         </select>
                                     </div>
                                     <div class="col-12">
@@ -115,10 +113,8 @@
                                     Kirim Laporan
                                 </button>
                             </div>
-
                         </form>
                     </div>
-
                 </main>
         </div>
 </div>
