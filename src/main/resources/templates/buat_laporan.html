@@ -70,9 +70,9 @@
                                 <select class="form-select py-2 text-muted" id="kategori" name="categoryId" required>
                                     <option selected disabled value="">Pilih Kategori Kerusakan</option>
                                     <option
-                                            th:each="cat : ${listKategori}"
-                                            th:value="${cat.id}"
-                                            th:text="${cat.name}">Nama Kategori</option>
+                                            th:each="category : ${categories}"
+                                            th:value="${category.id}"
+                                            th:text="${category.name}">Nama Kategori</option>
                                 </select>
                             </div>
 
@@ -89,9 +89,9 @@
                                         <select class="form-select py-2 text-muted" name="roomId" required>
                                             <option selected disabled value="">Pilih Ruangan</option>
                                             <option
-                                                th:each="ruang : ${listRuangan}"
-                                                th:value="${ruang.id}"
-                                                th:text="${ruang.name} + ' (Lantai ' + ${ruang.floor} +')'">Nama Ruangan</option>
+                                                th:each="room : ${rooms}"
+                                                th:value="${room.id}"
+                                                th:text="${room.name} + ' (Lantai ' + ${room.floor} +')'">Nama Ruangan</option>
                                         </select>
                                     </div>
                                 </div>
