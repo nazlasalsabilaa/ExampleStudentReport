@@ -91,7 +91,7 @@
                                             <option
                                                 th:each="room : ${rooms}"
                                                 th:value="${room.id}"
-                                                th:text="${room.name} + ' (Lantai ' + ${room.floor} +')'">Nama Ruangan</option>
+                                                th:text="${room.building != null ? room.building.name + ' - ' : ''} + ${room.name} + ' (Lantai ' + ${room.floor} +')'">Nama Ruangan</option>
                                         </select>
                                     </div>
                                 </div>

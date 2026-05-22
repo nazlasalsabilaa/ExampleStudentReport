@@ -16,7 +16,7 @@
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                     <circle cx="12" cy="10" r="3"></circle>
                 </svg>
-                <span th:text="${report.room != null ? (report.room.name + ' - Lantai ' + report.room.floor) : 'Ruang A201 - Lantai 2'}">Lokasi Ruangan</span>
+                <span th:text="${report.room != null && report.room.building != null ? (report.room.building.name + ' - ' + report.room.name + ' - Lantai ' + report.room.floor) : 'Ruang A201 - Lantai 2'}">Gedung - Lokasi Ruangan</span>
             </p>
             <p class="text-muted small mb-0" th:text="${report.description ?: 'AC mengalami kebocoran saat digunakan.'}">Deskripsi kerusakan...</p>
         </div>
