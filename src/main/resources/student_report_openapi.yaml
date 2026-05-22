@@ -3,20 +3,33 @@ openapi: 3.0.3
 info:
   title: Student Report System API
   description: |
-    REST API for the Student Report System.  
+    REST API for the Student Report System.
     Built with **Spring Boot + Kotlin**.
 
     ## Authentication
-    All protected endpoints require a **Bearer token** obtained from `POST /auth/login`.  
-    Include it as:  `Authorization: Bearer <token>`
+    All protected endpoints require a **Bearer token** obtained from `POST /auth/login`.
+    Include it as: `Authorization: Bearer <token>`
+
+    ## Idempotency
+    Mutating endpoints (`POST`, `PUT`, `PATCH`) that are marked with the
+    `Idempotency-Key` header support safe retries. Supply a unique UUID v4 per
+    logical request. Duplicate keys within the TTL window return the cached
+    response without re-executing the operation.
 
     ## Roles
-    | Role  | Description                        |
-    |-------|------------------------------------|
-    | User  | Student — can submit & manage own reports |
-    | Admin | Staff  — full access to all resources |
+    | Role  | Description                                      |
+    |-------|--------------------------------------------------|
+    | User  | Student — can submit & manage their own reports  |
+    | Admin | Staff  — full access to all resources            |
 
-  version: 1.1.0
+    ## Status Transitions
+    ```
+    Pending → In_Progress → Completed
+    Pending → Rejected
+    In_Progress → Rejected
+    ```
+
+  version: 1.2.0
   contact:
     name: Student Report Team
 
@@ -31,6 +44,8 @@ tags:
     description: Registration, login and session management
   - name: Users
     description: User profile and account management
+  - name: Student Data
+    description: Student-specific academic information tied to a user account
   - name: Reports
     description: Student damage / issue reports
   - name: Images
@@ -56,12 +71,26 @@ components:
       scheme: bearer
       bearerFormat: JWT
 
-# ─────────────────────────────────────────────────────────────────────────────
-# REUSABLE SCHEMAS
-# ─────────────────────────────────────────────────────────────────────────────
+  # ─────────────────────────────────────────────────────────────────────────────
+  # REUSABLE HEADERS
+  # ─────────────────────────────────────────────────────────────────────────────
+  headers:
+    IdempotencyKey:
+      description: |
+        Client-generated UUID v4 used for safe retries. If a request with the
+        same key and path was already processed within the TTL window, the
+        cached response is returned without re-executing the operation.
+      schema:
+        type: string
+        format: uuid
+        example: 123e4567-e89b-12d3-a456-426614174000
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # REUSABLE SCHEMAS
+  # ─────────────────────────────────────────────────────────────────────────────
   schemas:
 
-    # ── Enums ─────────────────────────────────────────────────
+    # ── Enums ─────────────────────────────────────────────────────────────────
     UserRole:
       type: string
       enum: [Admin, User]
@@ -72,25 +101,44 @@ components:
       enum: [Pending, In_Progress, Completed, Rejected]
       example: Pending
 
-    # ── Wrappers ──────────────────────────────────────────────
+    # ── Generic Wrappers ──────────────────────────────────────────────────────
     ApiResponse:
       type: object
+      required: [success, message]
       properties:
         success:
           type: boolean
+          example: true
         message:
           type: string
+          example: Operation successful
         data:
           nullable: true
 
+    PagedResponse:
+      description: |
+        Reusable pagination envelope. Inline-extend this with the concrete
+        `content` array type at each endpoint using `allOf`.
+      type: object
+      required: [content, pagination]
+      properties:
+        content:
+          type: array
+          items: {}
+        pagination:
+          $ref: '#/components/schemas/PaginationMeta'
+
     PaginationMeta:
       type: object
+      required: [page, size, totalElements, totalPages]
       properties:
         page:
           type: integer
-          example: 1
+          minimum: 0
+          example: 0
         size:
           type: integer
+          minimum: 1
           example: 10
         totalElements:
           type: integer
@@ -101,6 +149,7 @@ components:
 
     ErrorResponse:
       type: object
+      required: [success, message]
       properties:
         success:
           type: boolean
@@ -112,16 +161,19 @@ components:
           type: array
           items:
             type: object
+            required: [field, message]
             properties:
               field:
                 type: string
+                example: email
               message:
                 type: string
+                example: must be a valid email address
 
-    # ── Auth ──────────────────────────────────────────────────
+    # ── Auth ──────────────────────────────────────────────────────────────────
     RegisterRequest:
       type: object
-      required: [name, email, password]
+      required: [name, email, password, nim, faculty, major, year]
       properties:
         name:
           type: string
@@ -137,6 +189,23 @@ components:
           format: password
           minLength: 8
           example: P@ssw0rd!
+        nim:
+          type: string
+          maxLength: 16
+          description: Student identification number (NIM). Must be unique.
+          example: "2410173100003"
+        faculty:
+          type: string
+          maxLength: 255
+          example: Fakultas Teknik
+        major:
+          type: string
+          maxLength: 255
+          example: Teknik Informatika
+        year:
+          type: integer
+          description: Academic entry year.
+          example: 2024
 
     LoginRequest:
       type: object
@@ -153,6 +222,7 @@ components:
 
     AuthResponse:
       type: object
+      required: [token, expiresAt, user]
       properties:
         token:
           type: string
@@ -164,9 +234,10 @@ components:
         user:
           $ref: '#/components/schemas/UserResponse'
 
-    # ── User ──────────────────────────────────────────────────
+    # ── User ──────────────────────────────────────────────────────────────────
     UserResponse:
       type: object
+      required: [id, name, email, role, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -181,6 +252,8 @@ components:
           example: 241017310003@mhs.ulm.ac.id
         role:
           $ref: '#/components/schemas/UserRole'
+        studentData:
+          $ref: '#/components/schemas/StudentDataResponse'
         createdAt:
           type: string
           format: date-time
@@ -188,33 +261,9 @@ components:
           type: string
           format: date-time
 
-    UserStatsResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        userId:
-          type: string
-          format: uuid
-        reportCount:
-          type: integer
-          example: 10
-        pendingReport:
-          type: integer
-          example: 3
-        completedReport:
-          type: integer
-          example: 5
-        rejectedReport:
-          type: integer
-          example: 2
-        updatedAt:
-          type: string
-          format: date-time
-
     UpdateUserRequest:
       type: object
+      minProperties: 1
       properties:
         name:
           type: string
@@ -240,9 +289,85 @@ components:
           minLength: 8
           example: N3wP@ss!
 
-    # ── Building ──────────────────────────────────────────────
+    UserStatsResponse:
+      type: object
+      required: [id, userId, reportCount, pendingReport, completedReport, rejectedReport, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        reportCount:
+          type: integer
+          minimum: 0
+          example: 10
+        pendingReport:
+          type: integer
+          minimum: 0
+          example: 3
+        completedReport:
+          type: integer
+          minimum: 0
+          example: 5
+        rejectedReport:
+          type: integer
+          minimum: 0
+          example: 2
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Student Data ───────────────────────────────────────────────────────────
+    StudentDataResponse:
+      type: object
+      required: [id, userId, nim, faculty, major, year]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        nim:
+          type: string
+          example: "2410173100003"
+        faculty:
+          type: string
+          example: Fakultas Teknik
+        major:
+          type: string
+          example: Teknik Informatika
+        year:
+          type: integer
+          example: 2024
+
+    UpdateStudentDataRequest:
+      type: object
+      minProperties: 1
+      description: All fields are optional; supply only what needs to change.
+      properties:
+        nim:
+          type: string
+          maxLength: 16
+          example: "2410173100003"
+        faculty:
+          type: string
+          maxLength: 255
+          example: Fakultas Teknik
+        major:
+          type: string
+          maxLength: 255
+          example: Teknik Informatika
+        year:
+          type: integer
+          example: 2024
+
+    # ── Building ──────────────────────────────────────────────────────────────
     BuildingResponse:
       type: object
+      required: [id, name, code, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -271,10 +396,12 @@ components:
         code:
           type: string
           maxLength: 255
+          description: Must be globally unique. Returns `409` if already taken.
           example: GFTBJM
 
     UpdateBuildingRequest:
       type: object
+      minProperties: 1
       properties:
         name:
           type: string
@@ -283,11 +410,13 @@ components:
         code:
           type: string
           maxLength: 255
+          description: Must be globally unique. Returns `409` if already taken.
           example: GFTBJMV2
 
-    # ── Room ──────────────────────────────────────────────────
+    # ── Room ──────────────────────────────────────────────────────────────────
     RoomResponse:
       type: object
+      required: [id, buildingId, name, floor, code, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -302,11 +431,12 @@ components:
           example: Ruang Kuliah A14
         floor:
           type: integer
+          minimum: 0
           example: 1
         code:
           type: string
           description: Unique room code across all buildings.
-          example: R-A14
+          example: RK-A14
         createdAt:
           type: string
           format: date-time
@@ -327,6 +457,7 @@ components:
           example: Ruang Kuliah A14
         floor:
           type: integer
+          minimum: 0
           example: 1
         code:
           type: string
@@ -336,6 +467,7 @@ components:
 
     UpdateRoomRequest:
       type: object
+      minProperties: 1
       properties:
         buildingId:
           type: string
@@ -345,14 +477,16 @@ components:
           maxLength: 255
         floor:
           type: integer
+          minimum: 0
         code:
           type: string
           maxLength: 255
           description: Must be unique across all rooms. Returns `409` if already taken.
 
-    # ── Category ──────────────────────────────────────────────
+    # ── Category ──────────────────────────────────────────────────────────────
     CategoryResponse:
       type: object
+      required: [id, name, description, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -384,6 +518,7 @@ components:
 
     UpdateCategoryRequest:
       type: object
+      minProperties: 1
       properties:
         name:
           type: string
@@ -391,13 +526,19 @@ components:
         description:
           type: string
 
-    # ── Report ────────────────────────────────────────────────
+    # ── Report ────────────────────────────────────────────────────────────────
     ReportResponse:
       type: object
+      required: [id, reporter, category, room, title, status, upvoteCount, images, version, createdAt, updatedAt]
       properties:
         id:
           type: string
           format: uuid
+        version:
+          type: integer
+          format: int64
+          description: Optimistic-locking version counter.
+          example: 0
         reporter:
           $ref: '#/components/schemas/UserResponse'
         category:
@@ -415,6 +556,7 @@ components:
           $ref: '#/components/schemas/ReportStatus'
         upvoteCount:
           type: integer
+          minimum: 0
           example: 5
         images:
           type: array
@@ -434,7 +576,10 @@ components:
 
     CreateReportRequest:
       type: object
-      required: [categoryId, roomId, title, status]
+      required: [categoryId, roomId, title]
+      description: |
+        Creates a new report. Initial status is always `Pending` and is set
+        server-side; do not include a status field.
       properties:
         categoryId:
           type: string
@@ -450,11 +595,11 @@ components:
           type: string
           nullable: true
           example: AC tidak berfungsi sejak kemarin pagi
-        status:
-          $ref: '#/components/schemas/ReportStatus'
 
     UpdateReportRequest:
       type: object
+      minProperties: 1
+      description: Only the reporter (while status is Pending) or an Admin may update these fields.
       properties:
         categoryId:
           type: string
@@ -471,7 +616,14 @@ components:
 
     UpdateReportStatusRequest:
       type: object
-      required: [status, notes]
+      required: [status]
+      description: |
+        Admin-only status transition. Automatically creates a `ReportLog` entry.
+
+        **Allowed transitions:**
+        `Pending → In_Progress → Completed`
+        `Pending → Rejected`
+        `In_Progress → Rejected`
       properties:
         status:
           $ref: '#/components/schemas/ReportStatus'
@@ -480,9 +632,10 @@ components:
           nullable: true
           example: Sudah dicek oleh teknisi
 
-    # ── Report Image ──────────────────────────────────────────
+    # ── Report Image ──────────────────────────────────────────────────────────
     ReportImageResponse:
       type: object
+      required: [id, reportId, imageUrl, uploadedAt]
       properties:
         id:
           type: string
@@ -498,12 +651,13 @@ components:
           type: string
           format: date-time
 
-    # ── Upvote ────────────────────────────────────────────────
+    # ── Upvote ────────────────────────────────────────────────────────────────
     UpvoteResponse:
       type: object
       description: |
-        A unique upvote per user per report, enforced by a composite unique index
-        on `(user_id, report_id)`.
+        One upvote per user per report, enforced by a composite unique index
+        on `(user_id, report_id)` in the database.
+      required: [id, userId, reportId, createdAt]
       properties:
         id:
           type: string
@@ -520,20 +674,23 @@ components:
 
     UpvoteSummaryResponse:
       type: object
+      required: [reportId, totalUpvotes, upvotedByMe]
       properties:
         reportId:
           type: string
           format: uuid
         totalUpvotes:
           type: integer
+          minimum: 0
           example: 12
         upvotedByMe:
           type: boolean
           example: true
 
-    # ── Report Log ────────────────────────────────────────────
+    # ── Report Log ────────────────────────────────────────────────────────────
     ReportLogResponse:
       type: object
+      required: [id, reportId, admin, oldStatus, newStatus, createdAt]
       properties:
         id:
           type: string
@@ -555,7 +712,7 @@ components:
           type: string
           format: date-time
 
-  # ── Common Parameters ──────────────────────────────────────
+  # ── Common Parameters ──────────────────────────────────────────────────────
   parameters:
     PathId:
       name: id
@@ -564,50 +721,83 @@ components:
       schema:
         type: string
         format: uuid
+
     QueryPage:
       name: page
       in: query
+      description: Zero-based page index.
       schema:
         type: integer
         default: 0
         minimum: 0
+
     QuerySize:
       name: size
       in: query
+      description: Number of items per page.
       schema:
         type: integer
         default: 10
         minimum: 1
         maximum: 100
+
     QuerySearch:
       name: search
       in: query
+      description: Free-text search term (case-insensitive substring match).
       schema:
         type: string
-      description: Search by name or title (case-insensitive)
 
-  # ── Common Responses ───────────────────────────────────────
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: |
+        UUID v4 for safe retries. If omitted, no idempotency check is applied.
+      schema:
+        type: string
+        format: uuid
+        example: 123e4567-e89b-12d3-a456-426614174000
+
+  # ── Common Responses ───────────────────────────────────────────────────────
   responses:
     Unauthorized:
-      description: Missing or invalid Bearer token
+      description: Missing or invalid authentication token
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+
     Forbidden:
-      description: Authenticated but insufficient role
+      description: Authenticated user lacks the required role
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+
     NotFound:
-      description: Resource not found
+      description: Requested resource does not exist
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+
+    Conflict:
+      description: Unique constraint violation (e.g. duplicate code, already upvoted)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
     UnprocessableEntity:
-      description: Validation failed
+      description: Request body failed validation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntityStatus:
+      description: Invalid or disallowed status transition
       content:
         application/json:
           schema:
@@ -618,15 +808,21 @@ components:
 # ─────────────────────────────────────────────────────────────────────────────
 paths:
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
   # AUTH
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /auth/register:
     post:
       tags: [Auth]
-      summary: Register a new user
+      summary: Register a new student account
+      description: |
+        Creates a `User` record with role `User` and a linked `StudentData` record
+        from the fields provided. A `UserStats` record is also initialised
+        server-side with all counters set to zero.
       operationId: register
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -645,14 +841,18 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/UserResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
   /auth/login:
     post:
       tags: [Auth]
-      summary: Login and obtain access token
+      summary: Login and obtain a Bearer token
       operationId: login
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -661,7 +861,7 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Login successful
+          description: Login successful — returns the session token and user profile
           content:
             application/json:
               schema:
@@ -673,11 +873,13 @@ paths:
                         $ref: '#/components/schemas/AuthResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
 
   /auth/logout:
     post:
       tags: [Auth]
-      summary: Logout and invalidate current session token
+      summary: Logout and invalidate the current session token
       operationId: logout
       security:
         - BearerAuth: []
@@ -694,7 +896,7 @@ paths:
   /auth/me:
     get:
       tags: [Auth]
-      summary: Get current authenticated user profile
+      summary: Get the currently authenticated user (with student data)
       operationId: getMe
       security:
         - BearerAuth: []
@@ -713,9 +915,9 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
   # USERS
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /users:
     get:
@@ -743,14 +945,14 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          content:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/UserResponse'
-                          pagination:
-                            $ref: '#/components/schemas/PaginationMeta'
+                        allOf:
+                          - $ref: '#/components/schemas/PagedResponse'
+                          - type: object
+                            properties:
+                              content:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/UserResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -790,6 +992,8 @@ paths:
       operationId: updateUser
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -814,6 +1018,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
@@ -837,10 +1043,38 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /users/{id}/stats:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Users]
+      summary: Get report statistics for a specific user (Admin only)
+      operationId: getUserStats
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserStatsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /users/me:
     get:
       tags: [Users]
-      summary: Get own profile
+      summary: Get own profile (with student data)
       operationId: getOwnProfile
       security:
         - BearerAuth: []
@@ -861,10 +1095,12 @@ paths:
 
     put:
       tags: [Users]
-      summary: Update own profile
+      summary: Update own profile (name / email)
       operationId: updateOwnProfile
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -885,6 +1121,8 @@ paths:
                         $ref: '#/components/schemas/UserResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
@@ -895,6 +1133,8 @@ paths:
       operationId: changeOwnPassword
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -903,7 +1143,7 @@ paths:
               $ref: '#/components/schemas/ChangePasswordRequest'
       responses:
         '200':
-          description: Password changed
+          description: Password changed successfully
           content:
             application/json:
               schema:
@@ -922,7 +1162,7 @@ paths:
         - BearerAuth: []
       responses:
         '200':
-          description: User statistics
+          description: Own statistics
           content:
             application/json:
               schema:
@@ -935,17 +1175,141 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
+  # STUDENT DATA
+  # ════════════════════════════════════════════════════════════════════════════
+
+  /users/me/student-data:
+    get:
+      tags: [Student Data]
+      summary: Get own student data
+      operationId: getOwnStudentData
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Own student data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StudentDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [Student Data]
+      summary: Update own student data
+      operationId: updateOwnStudentData
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentDataRequest'
+      responses:
+        '200':
+          description: Updated own student data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StudentDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /users/{id}/student-data:
+    parameters:
+      - $ref: '#/components/parameters/PathId'
+    get:
+      tags: [Student Data]
+      summary: Get student data for a user (Admin only)
+      operationId: getStudentDataByUserId
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Student data for the specified user
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StudentDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Student Data]
+      summary: Update student data for a user (Admin only)
+      operationId: updateStudentDataByUserId
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentDataRequest'
+      responses:
+        '200':
+          description: Updated student data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StudentDataResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ════════════════════════════════════════════════════════════════════════════
   # REPORTS
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /reports:
     get:
       tags: [Reports]
       summary: List reports
       description: |
-        - **User**: returns only their own reports.  
-        - **Admin**: returns all reports with optional filters.
+        - **User**: returns only their own non-deleted reports.
+        - **Admin**: returns all reports (including soft-deleted) with optional filters.
       operationId: listReports
       security:
         - BearerAuth: []
@@ -972,6 +1336,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: includeDeleted
+          in: query
+          description: Include soft-deleted reports. Admin only; ignored for Users.
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Paginated list of reports
@@ -983,23 +1353,28 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          content:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/ReportResponse'
-                          pagination:
-                            $ref: '#/components/schemas/PaginationMeta'
+                        allOf:
+                          - $ref: '#/components/schemas/PagedResponse'
+                          - type: object
+                            properties:
+                              content:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/ReportResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
     post:
       tags: [Reports]
       summary: Create a new report (User)
+      description: |
+        Submits a new report. Status is always initialised to `Pending` server-side.
+        Increments the reporter's `UserStats.reportCount` and `UserStats.pendingReport`.
       operationId: createReport
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1020,6 +1395,14 @@ paths:
                         $ref: '#/components/schemas/ReportResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Referenced category or room not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
@@ -1029,6 +1412,9 @@ paths:
     get:
       tags: [Reports]
       summary: Get report by ID
+      description: |
+        - **User**: only accessible if they are the reporter.
+        - **Admin**: accessible for any report.
       operationId: getReportById
       security:
         - BearerAuth: []
@@ -1046,16 +1432,24 @@ paths:
                         $ref: '#/components/schemas/ReportResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
 
     put:
       tags: [Reports]
-      summary: Update report (owner or Admin)
-      description: Only the reporter or an Admin can update title, description, category, or room. Status changes must use `PATCH /reports/{id}/status`.
+      summary: Update report content (reporter or Admin)
+      description: |
+        Updates title, description, category, or room. Status changes must use
+        `PATCH /reports/{id}/status`.
+
+        Reporters may only edit while the report status is `Pending`.
       operationId: updateReport
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1085,15 +1479,13 @@ paths:
 
     delete:
       tags: [Reports]
-      summary: Soft-delete report (owner or Admin)
+      summary: Soft-delete report (reporter or Admin)
       description: |
-        Sets `deleted_at` timestamp; the report row itself is **not** permanently removed.
+        Sets `deleted_at` to the current timestamp. The database row is **not**
+        physically removed.
 
-        **Cascade behaviour on hard delete (if ever triggered internally):**  
-        Deleting a report permanently will cascade-delete all related:
-        - `Report_Image` records (FK `delete: cascade`)
-        - `Upvote` records (FK `delete: cascade`)
-        - `Report_Log` entries (FK `delete: cascade`)
+        If the record is later hard-deleted (admin operation), all related
+        `Report_Image`, `Upvote`, and `Report_Log` rows are cascade-deleted.
       operationId: deleteReport
       security:
         - BearerAuth: []
@@ -1118,15 +1510,17 @@ paths:
       tags: [Reports]
       summary: Update report status (Admin only)
       description: |
-        Changes report status and automatically creates a `ReportLog` entry.
+        Applies a status transition and automatically creates a `ReportLog` entry.
+        Also updates the reporter's `UserStats` counters atomically.
 
-        **Allowed transitions:**  
-        `Pending → In_Progress → Completed`  
-        `Pending → Rejected`  
-        `In_Progress → Rejected`
+        **Valid transitions:**
+        `Pending → In_Progress`, `In_Progress → Completed`,
+        `Pending → Rejected`, `In_Progress → Rejected`
       operationId: updateReportStatus
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1135,7 +1529,7 @@ paths:
               $ref: '#/components/schemas/UpdateReportStatusRequest'
       responses:
         '200':
-          description: Status updated, log entry created
+          description: Status updated and log entry created
           content:
             application/json:
               schema:
@@ -1152,18 +1546,18 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/UnprocessableEntityStatus'
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
   # IMAGES
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /reports/{id}/images:
     parameters:
       - $ref: '#/components/parameters/PathId'
     get:
       tags: [Images]
-      summary: List images of a report
+      summary: List images attached to a report
       operationId: listReportImages
       security:
         - BearerAuth: []
@@ -1183,18 +1577,23 @@ paths:
                           $ref: '#/components/schemas/ReportImageResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
 
     post:
       tags: [Images]
-      summary: Upload images for a report (owner or Admin)
+      summary: Upload images for a report (reporter or Admin)
       description: |
-        Uploads one or more images and associates them with the report.  
-        Images are **cascade-deleted** when the parent report is permanently deleted.
+        Accepts one or more image files (`multipart/form-data`).
+        Accepted MIME types: `image/jpeg`, `image/png`. Maximum 5 MB per file.
+        Images are cascade-deleted when the parent report is permanently removed.
       operationId: uploadReportImages
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1208,10 +1607,10 @@ paths:
                   items:
                     type: string
                     format: binary
-                  description: One or more image files (JPEG / PNG, max 5 MB each)
+                  description: One or more image files (JPEG / PNG, max 5 MB each).
       responses:
         '201':
-          description: Images uploaded
+          description: Images uploaded and linked to the report
           content:
             application/json:
               schema:
@@ -1243,7 +1642,7 @@ paths:
           format: uuid
     delete:
       tags: [Images]
-      summary: Delete a specific image from a report (owner or Admin)
+      summary: Delete a specific image from a report (reporter or Admin)
       operationId: deleteReportImage
       security:
         - BearerAuth: []
@@ -1261,9 +1660,9 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
   # BUILDINGS
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /buildings:
     get:
@@ -1287,14 +1686,14 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          content:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/BuildingResponse'
-                          pagination:
-                            $ref: '#/components/schemas/PaginationMeta'
+                        allOf:
+                          - $ref: '#/components/schemas/PagedResponse'
+                          - type: object
+                            properties:
+                              content:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/BuildingResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
@@ -1304,6 +1703,8 @@ paths:
       operationId: createBuilding
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1326,6 +1727,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
@@ -1361,6 +1764,8 @@ paths:
       operationId: updateBuilding
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1385,6 +1790,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
@@ -1424,9 +1831,10 @@ paths:
           in: query
           schema:
             type: integer
+            minimum: 0
       responses:
         '200':
-          description: Rooms in the building
+          description: Paginated list of rooms in the building
           content:
             application/json:
               schema:
@@ -1435,22 +1843,22 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          content:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/RoomResponse'
-                          pagination:
-                            $ref: '#/components/schemas/PaginationMeta'
+                        allOf:
+                          - $ref: '#/components/schemas/PagedResponse'
+                          - type: object
+                            properties:
+                              content:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/RoomResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
   # ROOMS
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /rooms:
     get:
@@ -1472,6 +1880,7 @@ paths:
           in: query
           schema:
             type: integer
+            minimum: 0
       responses:
         '200':
           description: Paginated list of rooms
@@ -1483,14 +1892,14 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          content:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/RoomResponse'
-                          pagination:
-                            $ref: '#/components/schemas/PaginationMeta'
+                        allOf:
+                          - $ref: '#/components/schemas/PagedResponse'
+                          - type: object
+                            properties:
+                              content:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/RoomResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
@@ -1500,6 +1909,8 @@ paths:
       operationId: createRoom
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1522,12 +1933,14 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '409':
-          description: Room code already exists
+        '404':
+          description: Referenced building not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
@@ -1563,6 +1976,8 @@ paths:
       operationId: updateRoom
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1588,11 +2003,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Room code already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Conflict'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
 
@@ -1616,9 +2027,9 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
   # CATEGORIES
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /categories:
     get:
@@ -1642,14 +2053,14 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          content:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/CategoryResponse'
-                          pagination:
-                            $ref: '#/components/schemas/PaginationMeta'
+                        allOf:
+                          - $ref: '#/components/schemas/PagedResponse'
+                          - type: object
+                            properties:
+                              content:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/CategoryResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
@@ -1659,6 +2070,8 @@ paths:
       operationId: createCategory
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1716,6 +2129,8 @@ paths:
       operationId: updateCategory
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -1763,16 +2178,16 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
   # UPVOTES
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /reports/{id}/upvotes:
     parameters:
       - $ref: '#/components/parameters/PathId'
     get:
       tags: [Upvotes]
-      summary: Get upvote summary and status for a report
+      summary: Get upvote summary and current-user status for a report
       operationId: getUpvoteSummary
       security:
         - BearerAuth: []
@@ -1797,13 +2212,15 @@ paths:
       tags: [Upvotes]
       summary: Upvote a report (User)
       description: |
-        Each user may upvote a given report exactly once.  
-        This is enforced at both the API level (returns `409`) and the database level
-        via a composite unique index on `(user_id, report_id)`.  
-        When the parent report is deleted, all its upvotes are **cascade-deleted**.
+        Each user may upvote a report exactly once, enforced at the API level
+        (`409`) and at the database level via a composite unique index on
+        `(user_id, report_id)`.
+        Upvotes are cascade-deleted when the parent report is permanently removed.
       operationId: upvoteReport
       security:
         - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       responses:
         '201':
           description: Upvote recorded
@@ -1821,16 +2238,11 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Already upvoted
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/Conflict'
 
     delete:
       tags: [Upvotes]
-      summary: Remove upvote from a report (User)
-      description: Removes the authenticated user's upvote from the report.
+      summary: Remove own upvote from a report (User)
       operationId: removeUpvote
       security:
         - BearerAuth: []
@@ -1846,9 +2258,9 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
   # REPORT LOG
-  # ════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════
 
   /reports/{id}/logs:
     parameters:
@@ -1857,11 +2269,11 @@ paths:
       tags: [Report Log]
       summary: Get audit log for a specific report
       description: |
-        Returns all status-change log entries for the given report.  
-        - **User**: can view logs of their own reports.  
-        - **Admin**: can view logs of any report.
+        Returns all status-change log entries for the given report, newest first.
+        - **User**: can view logs of their own reports only.
+        - **Admin**: can view logs for any report.
 
-        Log entries are **cascade-deleted** when the parent report is permanently deleted.
+        Log entries are cascade-deleted when the parent report is permanently removed.
       operationId: getReportLogs
       security:
         - BearerAuth: []
@@ -1879,14 +2291,14 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          content:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/ReportLogResponse'
-                          pagination:
-                            $ref: '#/components/schemas/PaginationMeta'
+                        allOf:
+                          - $ref: '#/components/schemas/PagedResponse'
+                          - type: object
+                            properties:
+                              content:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/ReportLogResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1906,17 +2318,19 @@ paths:
         - $ref: '#/components/parameters/QuerySize'
         - name: adminId
           in: query
+          description: Filter by the admin who made the change.
           schema:
             type: string
             format: uuid
-          description: Filter by admin who made the change
         - name: reportId
           in: query
+          description: Filter by report.
           schema:
             type: string
             format: uuid
         - name: newStatus
           in: query
+          description: Filter by the resulting status.
           schema:
             $ref: '#/components/schemas/ReportStatus'
       responses:
@@ -1930,14 +2344,14 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          content:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/ReportLogResponse'
-                          pagination:
-                            $ref: '#/components/schemas/PaginationMeta'
+                        allOf:
+                          - $ref: '#/components/schemas/PagedResponse'
+                          - type: object
+                            properties:
+                              content:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/ReportLogResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
