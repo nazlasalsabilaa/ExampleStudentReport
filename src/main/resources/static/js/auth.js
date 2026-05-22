@@ -23,8 +23,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    localStorage.setItem('jwt_token', result.data.token);
-
                     window.location.href = "/dashboard";
                 } else {
                     alert("Login failed : " + (result.message || "Unknown error"));
