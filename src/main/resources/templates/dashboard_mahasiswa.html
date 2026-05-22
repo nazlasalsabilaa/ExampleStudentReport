@@ -77,7 +77,7 @@
                         Belum ada laporan yang diajukan.
                     </div>
 
-                    <div th:replace="~{fragments/card :: report-card(report=${report})}" th:each="report: ${recentReports}"></div>
+                    <div th:replace="~{fragments/card :: report-card-simple(report=${report})}" th:each="report: ${recentReports}"></div>
                 </div>
             </div>
         </main>
