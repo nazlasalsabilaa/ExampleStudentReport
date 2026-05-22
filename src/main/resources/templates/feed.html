@@ -64,7 +64,9 @@
                     <p class="mb-0 fw-medium">Belum ada data laporan aktif yang masuk ke sistem.</p>
                 </div>
 
-                <div th:replace="~{fragments/card :: report-card-feed(report=${report})}" th:each="report : ${allReports}"></div>
+                <th:block th:each="report : ${allReports}">
+                    <div th:replace="~{fragments/card :: report-card-feed(report=${report})}"></div>
+                </th:block>
             </div>
 
         </main>
