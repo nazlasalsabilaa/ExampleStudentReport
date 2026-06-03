@@ -13,7 +13,7 @@ data class User(
     @GeneratedValue
     val id: UUID? = null,
 
-    val email: String,
+    var email: String,
 
     @Column(name = "password_hash")
     val passwordHash: String,
