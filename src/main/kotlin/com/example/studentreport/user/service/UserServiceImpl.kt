@@ -1,0 +1,124 @@
+package com.example.studentreport.user.service
+
+import com.example.studentreport.auth.dto.UserResponse
+import com.example.studentreport.entity.User
+import com.example.studentreport.entity.UserRole
+import com.example.studentreport.repository.UserRepository
+import com.example.studentreport.repository.UserStatsRepository
+import com.example.studentreport.user.dto.ChangePasswordRequest
+import com.example.studentreport.user.dto.UpdateUserRequest
+import com.example.studentreport.user.dto.UserStatsResponse
+import jakarta.persistence.criteria.Predicate
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
+import org.springframework.security.crypto.password.PasswordEncoder
+import java.time.Instant
+import java.time.ZoneOffset
+import java.util.UUID
+
+class UserServiceImpl(
+    private val userRepository: UserRepository,
+    private val userStatsRepository: UserStatsRepository,
+    private val passwordEncoder: PasswordEncoder
+): UserService {
+    override fun getUserProfile(userId: UUID): UserResponse {
+        val user = findUserOrThrow(userId)
+        return user.toResponse()
+    }
+
+    override fun getAllUsers(
+        search: String?,
+        role: UserRole?,
+        pageable: Pageable
+    ): Page<UserResponse> {
+        val spec = Specification<User> { root, _, cb ->
+            val predicates = mutableListOf<Predicate>()
+
+            if (!search.isNullOrBlank()) {
+                val searchPattern = "%${search.lowercase()}%"
+                val namePredicate = cb.like(cb.lower(root.get("name")), searchPattern)
+                val emailPredicate = cb.like(cb.lower(root.get("email")), searchPattern)
+                predicates.add(cb.or(namePredicate, emailPredicate))
+            }
+
+            if (role != null) {
+                predicates.add(cb.equal(root.get<UserRole>("role"), role))
+            }
+
+            cb.and(*predicates.toTypedArray())
+        }
+        return userRepository.findAll(spec, pageable).map { it.toResponse() }
+    }
+
+    override fun updateUser(
+        userId: UUID,
+        request: UpdateUserRequest
+    ): UserResponse {
+        val user = findUserOrThrow(userId)
+
+        request.email?.let { newEmail ->
+            if (newEmail != user.email && userRepository.existsByEmail(newEmail)) {
+                throw IllegalArgumentException("Email is already in use")
+            }
+            user.email = newEmail
+        }
+
+        request.name?.let { user.name = it }
+        user.updatedAt = Instant.now()
+
+        return userRepository.save(user).toResponse()
+    }
+
+    override fun deleteUser(userId: UUID) {
+        val user = findUserOrThrow(userId)
+        userRepository.delete(user)
+    }
+
+    override fun getUserStats(userId: UUID): UserStatsResponse {
+        val stats = userStatsRepository.findAll().firstOrNull { it.userId == userId }
+            ?: throw IllegalArgumentException("User stats not found")
+
+        return UserStatsResponse(
+            id = stats.id!!,
+            userId = stats.userId,
+            reportCount = stats.reportCount,
+            pendingReport = stats.pendingReport,
+            completedReport = stats.completedReport,
+            rejectedReport = stats.rejectedReport,
+            updatedAt = stats.updatedAt
+        )
+    }
+
+    override fun changePassword(
+        userId: UUID,
+        request: ChangePasswordRequest
+    ) {
+        val user = findUserOrThrow(userId)
+        if (!passwordEncoder.matches(request.oldPassword, user.passwordHash)) {
+            throw IllegalArgumentException("Invalid old password")
+        }
+
+        user.passwordHash = passwordEncoder.encode(request.newPassword)!!
+        user.updatedAt = Instant.now()
+
+        userRepository.save(user)
+    }
+
+    private fun findUserOrThrow(userId: UUID): User {
+        return userRepository.findById(userId).orElseThrow{
+            IllegalArgumentException("User Not Found")
+        }
+    }
+
+    private fun User.toResponse(): UserResponse {
+        return UserResponse(
+            id = this.id!!,
+            name = this.name,
+            email = this.email,
+            role = this.role.name,
+            createdAt = this.createdAt.atOffset(ZoneOffset.UTC),
+            updatedAt = this.updatedAt.atOffset(ZoneOffset.UTC)
+        )
+    }
+}
