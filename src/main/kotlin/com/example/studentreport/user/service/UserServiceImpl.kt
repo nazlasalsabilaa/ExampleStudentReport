@@ -13,20 +13,26 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.UUID
 
+@Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
     private val userStatsRepository: UserStatsRepository,
     private val passwordEncoder: PasswordEncoder
 ): UserService {
+
+    @Transactional(readOnly = true)
     override fun getUserProfile(userId: UUID): UserResponse {
         val user = findUserOrThrow(userId)
         return user.toResponse()
     }
 
+    @Transactional(readOnly = true)
     override fun getAllUsers(
         search: String?,
         role: UserRole?,
@@ -51,6 +57,7 @@ class UserServiceImpl(
         return userRepository.findAll(spec, pageable).map { it.toResponse() }
     }
 
+    @Transactional
     override fun updateUser(
         userId: UUID,
         request: UpdateUserRequest
@@ -70,11 +77,13 @@ class UserServiceImpl(
         return userRepository.save(user).toResponse()
     }
 
+    @Transactional
     override fun deleteUser(userId: UUID) {
         val user = findUserOrThrow(userId)
         userRepository.delete(user)
     }
 
+    @Transactional(readOnly = true)
     override fun getUserStats(userId: UUID): UserStatsResponse {
         val stats = userStatsRepository.findAll().firstOrNull { it.userId == userId }
             ?: throw IllegalArgumentException("User stats not found")
@@ -90,6 +99,7 @@ class UserServiceImpl(
         )
     }
 
+    @Transactional
     override fun changePassword(
         userId: UUID,
         request: ChangePasswordRequest
