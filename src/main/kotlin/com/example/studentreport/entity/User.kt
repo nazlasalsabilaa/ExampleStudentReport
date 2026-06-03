@@ -16,7 +16,7 @@ data class User(
     var email: String,
 
     @Column(name = "password_hash")
-    val passwordHash: String,
+    var passwordHash: String,
 
     @Column(name = "created_at")
     val createdAt: Instant,
