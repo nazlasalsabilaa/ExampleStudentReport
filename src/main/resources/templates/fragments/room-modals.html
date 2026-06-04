@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="add-room-modal" class="modal fade" id="modalAddRoom" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+                <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                    <h1 class="modal-title h5 fw-bold text-dark">Tambah Ruangan Baru</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/master-data/rooms" method="post">
+                    <div class="modal-body px-4 py-3">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Nama Gedung</label>
+                            <input type="text" class="form-control py-2" name="buildingName" placeholder="Misal: Gedung Fakultas Teknik" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Nama Ruangan</label>
+                            <input type="text" class="form-control py-2" name="name" placeholder="Misal: Ruang A-14" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Lantai</label>
+                            <input type="text" class="form-control py-2" name="floor" placeholder="Misal: 1" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
+                        <button type="button" class="btn btn-white border fw-semibold text-dark" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn fw-bold px-4" style="background-color: #BDE0FE; color: #0F172A; border: 1px solid #A2D2FF">Simpan Ruangan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
