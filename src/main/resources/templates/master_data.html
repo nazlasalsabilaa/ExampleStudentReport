@@ -69,7 +69,10 @@
                                                     th:data-desc="${category.description}">
                                                 Edit
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1">
+                                            <button class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1"
+                                                    data-bs-toggle="modal" data-bs-target="#modalDeleteCategory"
+                                                    th:data-id="${category.id}"
+                                                    th:data-name="${category.name}">
                                                 Delete
                                             </button>
                                         </td>
@@ -119,7 +122,10 @@
                                                     th:data-floor="${room.floor}">
                                                 Edit
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1">
+                                            <button class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1"
+                                                    data-bs-toggle="modal" data-bs-target="#modalDeleteRoom"
+                                                    th:data-id="${room.id}"
+                                                    th:data-name="${room.name}">
                                                 Delete
                                             </button>
                                         </td>
@@ -137,9 +143,11 @@
 
             <div th:replace="~{fragments/modals/category-modals :: add-category}"></div>
             <div th:replace="~{fragments/modals/category-modals :: edit-category}"></div>
+            <div th:replace="~{fragments/modals/category-modals :: delete-category}"></div>
 
             <div th:replace="~{fragments/modals/room-modals:: add-room}"></div>
             <div th:replace="~{fragments/modals/room-modals:: edit-room}"></div>
+            <div th:replace="~{fragments/modals/room-modals:: delete-room}"></div>
 
         </main>
     </div>
