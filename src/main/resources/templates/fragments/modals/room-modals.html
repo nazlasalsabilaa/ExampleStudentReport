@@ -63,5 +63,27 @@
             </div>
         </div>
     </div>
+
+    <div th:fragment="delete-room" class="modal fade" id="modalDeleteRoom" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 12px;">
+                <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                    <h1 class="modal-title h5 fw-bold text-danger">Konfirmasi Hapus</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/master-data/rooms/delete" method="post">
+                    <input type="hidden" id="deleteRoomId" name="id">
+                    <div class="modal-body px-4 py-3">
+                        <p class="text-dark mb-0">Apakah Anda yakin ingin menghapus kategori <span id="deleteRoomNameDisplay" class="fw-semibold"></span>?</p>
+                        <p class="text-danger small mt-2 mb-0">Tindakan ini mungkin akan memengaruhi laporan yang sudah menggunakan kategori ini.</p>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
+                        <button type="button" class="btn btn-white border fw-semibold text-dark" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger fw-bold px-4">Ya, Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
