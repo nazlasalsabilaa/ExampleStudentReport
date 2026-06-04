@@ -24,4 +24,28 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
+
+    const modalDeleteCategory = document.getElementById('modalDeleteCategory');
+    if (modalDeleteCategory) {
+        modalDeleteCategory.addEventListener('show.bs.modal', function(event) {
+           const button = event.relatedTarget;
+           const id = button.getAttribute('data-id');
+           const name = button.getAttribute('data-name');
+
+           modalDeleteCategory.querySelector('#deleteCategoryId').value = id;
+           modalDeleteCategory.querySelector('#deleteCategoryNameDisplay').textContent = name;
+        });
+    }
+
+    const modalDeleteRoom = document.getElementById('modalDeleteRoom');
+    if (modalDeleteRoom) {
+        modalDeleteRoom.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+
+            modalDeleteRoom.querySelector('#deleteRoomId').value = id;
+            modalDeleteRoom.querySelector('#deleteRoomNameDisplay').textContent = name;
+        });
+    }
 });
