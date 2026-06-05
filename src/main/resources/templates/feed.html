@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed Laporan - Student Report</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -29,17 +30,12 @@
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <div class="position-relative" style="min-width: 240px;">
                         <input type="text" class="form-control form-control-sm ps-5 py-2 bg-white border-0 shadow-sm" style="border-radius: 8px;" placeholder="Cari laporan...">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#64748B" stroke-width="2" class="position-absolute top-50 start-0 translate-middle-y ms-3" viewBox="0 0 24 24">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3" style="color: #64748B;"></i>
                     </div>
 
                     <div class="bg-white p-1 shadow-sm d-flex gap-2 align-items-center" style="border-radius: 8px;">
                         <span class="text-secondary small fw-semibold px-2 d-flex align-items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                            </svg>
+                            <i class="bi bi-funnel"></i>
                             Filter
                         </span>
 
@@ -58,9 +54,7 @@
 
             <div class="row">
                 <div th:if="${#lists.isEmpty(allReports)}" class="col-12 text-center text-muted py-5">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" class="mb-3 text-secondary animate-pulse" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+                    <i class="bi bi-circle mb-3 text-secondary animate-pulse d-inline-block" style="font-size: 3.5rem;"></i>
                     <p class="mb-0 fw-medium">Belum ada data laporan aktif yang masuk ke sistem.</p>
                 </div>
 
