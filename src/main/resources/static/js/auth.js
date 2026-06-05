@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     togglePasswordButtons.forEach(button => {
         button.addEventListener('click', function() {
             const passwordInput = this.previousElementSibling;
-            const Icon = this.querySelector('i');
+            const icon = this.querySelector('i');
 
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
