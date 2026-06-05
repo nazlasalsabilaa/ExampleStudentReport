@@ -38,7 +38,7 @@ class WebReportController(
         model.addAttribute("currentCategory", categoryId)
         model.addAttribute("currentRoom", roomId)
 
-        return "feed"
+        return "report/feed"
     }
 
     @GetMapping("/buat-laporan")
@@ -46,6 +46,6 @@ class WebReportController(
         model.addAttribute("isAdmin", webAuthHelper.isAdmin(auth))
         model.addAttribute("categories", masterDataService.getAllCategories())
         model.addAttribute("rooms", masterDataService.getAllRooms())
-        return "buat_laporan"
+        return "report/buat_laporan"
     }
 }
