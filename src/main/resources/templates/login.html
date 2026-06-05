@@ -6,6 +6,7 @@
     <title>Login - Student Report</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
@@ -17,7 +18,7 @@
             <div class="text-center mb-4">
                 <i class="bi bi-exclamation-circle text-dark" style="font-size: 2.5rem;"></i>
                 <h1 class="brand-title">STUDENT REPORT</h1>
-                <p class="text-muted" style="font-size: 0.8rem;">Sistem Pelaporan Kerusakan Fasilitas Kampus</p>
+                <p class="text-muted fw-semibold" style="font-size: 0.8rem;">Sistem Pelaporan Kerusakan Fasilitas Kampus</p>
             </div>
 
             <form id="loginForm" th:action="@{/login}" method="post">
