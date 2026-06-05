@@ -63,19 +63,21 @@
                                         <td class="px-4 py-3 fw-bold text-dark small fw-medium" th:text="${category.name}">Infrastruktur Kelas</td>
                                         <td class="px-4 py-3 text-muted small" th:text="${category.description}">Deskripsi</td>
                                         <td class="px-4 py-3 text-end">
-                                            <button class="btn btn-sm btn-outline-primary fw-semibold px-3 py-1 me-1"
-                                                    data-bs-toggle="modal" data-bs-target="#modalEditCategory"
-                                                    th:data-id="${category.id}"
-                                                    th:data-name="${category.name}"
-                                                    th:data-desc="${category.description}">
-                                                Edit
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1"
-                                                    data-bs-toggle="modal" data-bs-target="#modalDeleteCategory"
-                                                    th:data-id="${category.id}"
-                                                    th:data-name="${category.name}">
-                                                Delete
-                                            </button>
+                                            <div class="d-flex align-items-center justify-content-end gap-2">
+                                                <button class="btn btn-sm btn-primary fw-medium px-3 py-1"
+                                                        data-bs-toggle="modal" data-bs-target="#modalEditCategory"
+                                                        th:data-id="${category.id}"
+                                                        th:data-name="${category.name}"
+                                                        th:data-desc="${category.description}">
+                                                    Edit
+                                                </button>
+                                                <button class="btn btn-sm btn-danger fw-medium px-3 py-1"
+                                                        data-bs-toggle="modal" data-bs-target="#modalDeleteCategory"
+                                                        th:data-id="${category.id}"
+                                                        th:data-name="${category.name}">
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(categories)}">
@@ -115,20 +117,22 @@
                                         <td class="px-4 py-3 text-dark small" th:text="${room.name}">Ruang A-14</td>
                                         <td class="px-4 py-3 text-muted small" th:text="${room.floor}">Lantai 1</td>
                                         <td class="px-4 py-3 text-end text-nowrap">
-                                            <button class="btn btn-sm btn-outline-primary fw-semibold px-3 py-1 me-1"
-                                                    data-bs-toggle="modal" data-bs-target="#modalEditRoom"
-                                                    th:data-id="${room.id}"
-                                                    th:data-building="${room.building?.name}"
-                                                    th:data-name="${room.name}"
-                                                    th:data-floor="${room.floor}">
-                                                Edit
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1"
-                                                    data-bs-toggle="modal" data-bs-target="#modalDeleteRoom"
-                                                    th:data-id="${room.id}"
-                                                    th:data-name="${room.name}">
-                                                Delete
-                                            </button>
+                                            <div class="d-flex align-items-center justify-content-end gap-2">
+                                                <button class="btn btn-sm btn-primary fw-medium px-3 py-1"
+                                                        data-bs-toggle="modal" data-bs-target="#modalEditRoom"
+                                                        th:data-id="${room.id}"
+                                                        th:data-building="${room.building?.name}"
+                                                        th:data-name="${room.name}"
+                                                        th:data-floor="${room.floor}">
+                                                    Edit
+                                                </button>
+                                                <button class="btn btn-sm btn-danger fw-medium px-3 py-1"
+                                                        data-bs-toggle="modal" data-bs-target="#modalDeleteRoom"
+                                                        th:data-id="${room.id}"
+                                                        th:data-name="${room.name}">
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(rooms)}">
