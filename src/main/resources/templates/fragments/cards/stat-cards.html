@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="admin-stat-cards" class="row g-4 mb-5">
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm p-2 border-start border-danger border-4 h-100 rounded-3 hover-elevate">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="text-muted fw-bold mb-0 text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Antrean Baru</h6>
+                    <div class="p-2 bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-exclamation-octagon" style="font-size: 1.1rem;"></i>
+                    </div>
+                </div>
+                <h2 class="fw-extrabold text-dark mb-0" th:text="${pendingCount ?: '12'}">12</h2>
+                <p class="text-muted small mt-2 mb-0 d-flex align-items-center gap-1">
+                    <span class="text-danger fw-semibold">Prioritas</span> untuk ditindak
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm p-2 border-start border-warning border-4 h-100 rounded-3 hover-elevate">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="text-muted fw-bold mb-0 text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Sedang Ditangani</h6>
+                    <div class="p-2 bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-clock" style="font-size: 1.1rem;"></i>
+                    </div>
+                </div>
+                <h2 class="fw-extrabold text-dark mb-0" th:text="${inProgressCount ?: '8'}">8</h2>
+                <p class="text-muted small mt-2 mb-0">Dalam pengerjaan teknisi</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm p-2 border-start border-success border-4 h-100 rounded-3 hover-elevate">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="text-muted fw-bold mb-0 text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Laporan Selesai</h6>
+                    <div class="p-2 bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-check2-circle" style="font-size: 1.1rem;"></i>
+                    </div>
+                </div>
+                <h2 class="fw-extrabold text-dark mb-0" th:text="${completedCount ?: '45'}">45</h2>
+                <p class="text-muted small mt-2 mb-0">Total diselesaikan bulan ini</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="student-stat-cards" class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="bg-white p-4 shadow-sm text-center flex-column justify-content-between align-items-center h-100 hover-elevate" style="border-radius: 12px; border: none; border-left: 5px solid #0d6efd;">
+            <p class="fw-bold mb-2 text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Jumlah Laporan Saya</p>
+            <div class="d-flex align-items-center justify-content-center gap-3">
+                <h2 class="fw-bold mb-0 text-dark" style="font-size: 2.5rem;" th:text="${userStats?.reportCount ?: '0'}">0</h2>
+                <div class="rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px; background-color: #E7F1FF;">
+                    <i class="bi bi-file-earmark-richtext" style="font-size: 1.25rem; color: #0d6efd"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="bg-white p-4 shadow-sm text-center d-flex flex-column justify-content-center align-items-center h-100 hover-elevate" style="border-radius: 12px; border: none; border-left: 5px solid #ffda6a;">
+            <p class="fw-bold mb-2 text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Laporan Diproses</p>
+            <div class="d-flex align-items-center justify-content-center gap-3">
+                <h2 class="fw-bold mb-0 text-dark" style="font-size: 2.5rem;" th:text="${userStats?.pendingReport ?: '0'}">0</h2>
+                <div class="rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px; background-color: #FFF8D6;">
+                    <i class="bi bi-clock" style="font-size: 1.25rem; color: #d39e00;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="bg-white p-4 shadow-sm text-center d-flex flex-column justify-content-center align-items-center h-100 hover-elevate" style="border-radius: 12px; border: none; border-left: 5px solid #75b798;">
+            <p class="fw-bold mb-2 text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Laporan Selesai</p>
+            <div class="d-flex align-items-center justify-content-center gap-3">
+                <h2 class="fw-bold mb-0 text-dark" style="font-size: 2.5rem;" th:text="${userStats?.completedReport ?: '0'}">0</h2>
+                <div class="rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px; background-color: #E8F3ED;">
+                    <i class="bi bi-check2-circle" style="font-size: 1.25rem; color: #198754;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
