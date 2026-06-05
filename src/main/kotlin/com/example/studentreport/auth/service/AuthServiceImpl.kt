@@ -95,6 +95,7 @@ class AuthServiceImpl(
             reportCount = 0,
             pendingReport = 0,
             completedReport = 0,
+            inProgressReport = 0,
             rejectedReport = 0,
             updatedAt = now,
             user = savedUser

@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import java.util.UUID
 
 @Controller
 class WebDashboardController(
@@ -18,9 +19,12 @@ class WebDashboardController(
             return "redirect:/dashboard/admin"
         }
 
+        val userId = auth?.principal as? UUID
+            ?: throw IllegalStateException("User must be authenticated")
+
         model.addAttribute("isAdmin", false)
-        model.addAttribute("userStats", dashboardService.getUserDashboardStats())
-        model.addAttribute("recentReports", dashboardService.getRecentUserReports(3))
+        model.addAttribute("userStats", dashboardService.getUserDashboardStats(userId))
+        model.addAttribute("recentReports", dashboardService.getRecentUserReports(userId, 3))
 
         return "dashboard/dashboard_mahasiswa"
     }

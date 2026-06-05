@@ -1,6 +1,7 @@
 package com.example.studentreport.repository
 
 import com.example.studentreport.entity.Report
+import com.example.studentreport.entity.ReportStatus
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
@@ -15,4 +16,8 @@ interface ReportRepository : JpaRepository<Report, UUID>, JpaSpecificationExecut
 
     @EntityGraph(attributePaths = ["user", "room", "room.building", "category"])
     override fun findAll(spec: Specification<Report>, pageable: Pageable): Page<Report>
+
+    fun countByStatus(status: ReportStatus): Int
+    fun findByStatus(status: ReportStatus): List<Report>
+    fun findTop3ByReporterIdOrderByCreatedAtDesc(reporterId: UUID): List<Report>
 }
