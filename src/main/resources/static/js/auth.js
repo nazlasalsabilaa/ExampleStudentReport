@@ -4,15 +4,14 @@ document.addEventListener("DOMContentLoaded", function() {
     togglePasswordButtons.forEach(button => {
         button.addEventListener('click', function() {
             const passwordInput = this.previousElementSibling;
-            const svgIcon = this.querySelector('svg');
+            const Icon = this.querySelector('i');
 
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                icon.classList.toggle('bi-eye');
+                icon.classList.remove('bi-eye');
                 icon.classList.add('bi-eye-slash');
             } else {
                 passwordInput.type = 'password';
-                svgIcon.innerHTML =
                 icon.classList.remove('bi-eye-slash');
                 icon.classList.add('bi-eye');
             }
