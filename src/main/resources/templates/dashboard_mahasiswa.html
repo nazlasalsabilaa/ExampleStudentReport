@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <div th:replace="~{fragments/card :: student-stat-cards}"></div>
+            <div th:replace="~{fragments/cards/stat-cards :: student-stat-cards}"></div>
 
             <div class="bg-white p-4 shadow-sm" style="border-radius: 12px;">
                 <h3 class="h5 fw-bold text-dark mb-4">Laporan Terbaru</h3>
@@ -34,7 +34,7 @@
                     </div>
 
                     <th:block th:each="report: ${recentReports}">
-                        <div th:replace="~{fragments/card :: report-card-simple(report=${report})}"></div>
+                        <div th:replace="~{fragments/cards/report-cards :: report-card-simple(report=${report})}"></div>
                     </th:block>
                 </div>
             </div>
