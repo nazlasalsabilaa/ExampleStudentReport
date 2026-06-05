@@ -56,7 +56,7 @@
                 </div>
 
                 <th:block th:each="report : ${allReports}">
-                    <div th:replace="~{fragments/card :: report-card-feed(report=${report})}"></div>
+                    <div th:replace="~{fragments/cards/report-cards :: report-card-feed(report=${report})}"></div>
                 </th:block>
             </div>
 
