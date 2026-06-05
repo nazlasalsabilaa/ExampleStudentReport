@@ -15,6 +15,7 @@ data class ReportResponse(
     val description: String?,
     val status: ReportStatus,
     val upvoteCount: Int,
+    val images: List<ReportImageResponse>,
     val createdAt: OffsetDateTime,
     val updatedAt: OffsetDateTime,
     val deletedAt: OffsetDateTime? = null
