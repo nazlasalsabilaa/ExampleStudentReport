@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="report-card-simple(report)" class="col-12 col-md-4">
+    <a th:href="@{/report/{id}(id=${report.id ?: '1'})}" class="card h-100 border-0 bg-light p-2 text-decoration-none text-dark" style="border-radius: 8px; transition: transform 0.2s; cursor: pointer;">
+        <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center" style="height: 140px;">
+            <i class="bi bi-image text-secondary" style="font-size: 2.5rem; opacity: 0.7;"></i>
+        </div>
+        <div class="card-body px-1 py-3 text-center">
+            <h4 class="h6 fw-extrabold text-dark mb-2 text-uppercase" style="letter-spacing: 0.5px;" th:text="${report.title ?: 'AC'}">NAMA FASILITAS</h4>
+            <p class="text-muted small mb-2 d-flex align-items-center justify-content-center gap-1 px-1">
+                <i class="bi bi-geo-alt" style="font-size: 0.8rem;"></i>
+                <span th:text="${report.room != null && report.room.building != null ? (report.room.name + ' - Lantai ' + report.room.floor) : 'Ruang A201 - Lantai 2'}">Lokasi Ruangan</span>
+            </p>
+            <p class="text-muted small mb-0" th:text="${report.description ?: 'AC mengalami kebocoran saat digunakan.'}">Deskripsi kerusakan...</p>
+        </div>
+    </a>
+</div>
+
+<div th:fragment="report-card-feed(report)" class="col-12 mb-4">
+    <a th:href="@{/report/{id}(id=${report.id ?: '1'})}" class="card border-0 shadow-sm p-4 bg-white mx-auto style-feed-card text-decoration-none text-dark" style="border-radius: 16px; max-width: 720px; transition: transform 0.2s; cursor: pointer;">
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 36px; height: 36px; font-size: 0.9rem;">
+                    <span th:text="${report.user != null ? report.user.name.substring(0,1) : 'U'}">U</span>
+                </div>
+                <span class="fw-bold text-dark small" th:text="${report.user != null ? report.user.name : 'Nama Pelapor'}">Nama Pelapor</span>
+            </div>
+
+            <div class="text-end d-flex align-items-center gap-2">
+                <div class="text-muted small d-flex align-items-center gap-1">
+                    <i class="bi bi-clock"></i>
+                    <span th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'dd MMM yyyy HH:mm', 'Asia/Makassar') : 'Baru saja'}">Waktu Pembuatan</span>
+                </div>
+
+                <span class="badge rounded-pill px-3 py-1.5 small font-monospace"
+                      th:classappend="${report.status != null ?
+                                (report.status.name() == 'COMPLETED' ? 'bg-success-subtle text-success' :
+                                (report.status.name() == 'IN_PROGRESS' ? 'bg-warning-subtle text-warning' :
+                                (report.status.name() == 'REJECTED' ? 'bg-danger-subtle text-danger' : 'bg-secondary-subtle text-secondary'))) : 'bg-secondary-subtle text-secondary'}"
+                      th:text="${report.status != null ? report.status.name() : 'PENDING'}">STATUS</span>
+            </div>
+        </div>
+
+        <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center mb-3" style="height: 240px; border-radius: 12px;">
+            <img th:if="${report.images != null && !report.images.isEmpty()}" th:src="${report.images[0].imageUrl}" class="w-100 h-100 object-fit-cover rounded" style="border-radius: 12px;" alt="Foto Kerusakan">
+
+            <i th:unless="${report.images != null && !report.images.isEmpty()}" class="bi bi-image text-secondary" style="font-size: 3.5rem; opacity: 0.7;"></i>
+        </div>
+
+        <div class="d-flex align-items-center gap-3 mb-3 text-dark fw-bold small">
+            <button class="btn btn-link text-decoration-none text-dark p-0 d-flex align-items-center gap-1 border-0 bg-transparent">
+                <i class="bi bi-chevron-up fw-bold" style="font-size: 1.1rem;"></i>
+                <span th:text="${report.upvotes != null ? report.upvotes.size() : '0'}">0</span>
+            </button>
+            <div class="d-flex align-items-center gap-1">
+                <i class="bi bi-chat" style="font-size: 1.05rem;"></i>
+                <span th:text="${report.logs != null ? report.logs.size() : '0'}">0</span>
+            </div>
+        </div>
+
+        <div>
+            <h4 class="h6 fw-extrabold text-dark mb-1 text-uppercase" style="letter-spacing: 0.5px;" th:text="${report.title ?: 'JUDUL LAPORAN'}">JUDUL LAPORAN</h4>
+            <p class="text-muted small mb-2" th:text="${report.description ?: 'Deskripsi detail mengenai kerusakan fasilitas.'}">Deskripsi kerusakan...</p>
+
+            <p class="text-dark fw-semibold small mb-0 d-flex align-items-center gap-1">
+                <i class="bi bi-geo-alt"></i>
+                <span th:text="${report.room != null && report.room.building != null ? (report.room.building.name + ' - ' + report.room.name + ' - Lantai ' + report.room.floor) : 'Lokasi Belum Ditentukan'}">Lokasi Lengkap</span>
+            </p>
+        </div>
+    </a>
+</div>
+</body>
+</html>
