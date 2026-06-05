@@ -30,7 +30,7 @@ class WebAuthController(
         if (webAuthHelper.isAuthenticated(auth)) {
             return if (webAuthHelper.isAdmin(auth)) "redirect:/master-data" else "redirect:/dashboard"
         }
-        return "login"
+        return "auth/login"
     }
 
     @GetMapping("/register")
@@ -38,7 +38,7 @@ class WebAuthController(
         if (webAuthHelper.isAuthenticated(auth)) {
             return if (webAuthHelper.isAdmin(auth)) "redirect:/master-data" else "redirect:/dashboard"
         }
-        return "register"
+        return "auth/register"
     }
 
     @GetMapping("/user/logout")

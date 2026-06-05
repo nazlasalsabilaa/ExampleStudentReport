@@ -22,7 +22,7 @@ class WebDashboardController(
         model.addAttribute("userStats", dashboardService.getUserDashboardStats())
         model.addAttribute("recentReports", dashboardService.getRecentUserReports(3))
 
-        return "dashboard_mahasiswa"
+        return "dashboard/dashboard_mahasiswa"
     }
 
     @GetMapping("/dashboard/admin")
@@ -35,6 +35,6 @@ class WebDashboardController(
         model.addAttribute("completedCount", stats["completedCount"])
         model.addAttribute("pendingReports", dashboardService.getPendingReports())
 
-        return "dashboard_admin"
+        return "dashboard/dashboard_admin"
     }
 }
