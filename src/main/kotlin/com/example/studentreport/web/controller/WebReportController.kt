@@ -1,5 +1,6 @@
 package com.example.studentreport.web.controller
 
+import com.example.studentreport.entity.ReportStatus
 import com.example.studentreport.report.service.ReportService
 import com.example.studentreport.web.service.MasterDataService
 import com.example.studentreport.web.service.WebAuthHelper
@@ -19,21 +20,45 @@ class WebReportController(
     private val masterDataService: MasterDataService,
     private val webAuthHelper: WebAuthHelper
 ) {
+
+    private fun Authentication?.getUserIdOrNull(): UUID? {
+        return if (this != null && this.isAuthenticated && this.principal is UUID) {
+            this.principal as UUID
+        } else null
+    }
+
     @GetMapping("/feed")
     fun feed(
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) categoryId: UUID?,
         @RequestParam(required = false) roomId: UUID?,
+        @RequestParam(required = false) buildingId: UUID?,
+        @RequestParam(required = false) status: ReportStatus?,
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
         auth: Authentication?,
         model: Model
     ): String {
-        val reportsPage = reportService.getFeedReports(search, categoryId, roomId, pageable)
+        val isAdmin = webAuthHelper.isAdmin(auth)
+        val currentUserId = auth.getUserIdOrNull()
+            ?: throw IllegalStateException("User must be authenticated to view feed")
 
-        model.addAttribute("isAdmin", webAuthHelper.isAdmin(auth))
+        val reportsPage = reportService.listReports(
+            search = search,
+            categoryId = categoryId,
+            roomId = roomId,
+            buildingId = buildingId,
+            status = status,
+            includeDeleted = false,
+            currentUserId = currentUserId,
+            isAdmin = isAdmin,
+            pageable = pageable
+        )
+
+        model.addAttribute("isAdmin", isAdmin)
         model.addAttribute("allReports", reportsPage.content)
         model.addAttribute("categories", masterDataService.getAllCategories())
         model.addAttribute("rooms", masterDataService.getAllRooms())
+
         model.addAttribute("currentSearch", search)
         model.addAttribute("currentCategory", categoryId)
         model.addAttribute("currentRoom", roomId)
