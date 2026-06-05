@@ -1,6 +1,6 @@
 package com.example.studentreport.web.controller
 
-import com.example.studentreport.web.service.ReportService
+import com.example.studentreport.report.service.ReportService
 import com.example.studentreport.web.service.MasterDataService
 import com.example.studentreport.web.service.WebAuthHelper
 import org.springframework.data.domain.Pageable
