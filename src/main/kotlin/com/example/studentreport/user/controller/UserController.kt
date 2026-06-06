@@ -4,6 +4,8 @@ import com.example.studentreport.auth.dto.ApiResponse
 import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.entity.UserRole
 import com.example.studentreport.user.dto.ChangePasswordRequest
+import com.example.studentreport.user.dto.StudentDataResponse
+import com.example.studentreport.user.dto.UpdateStudentDataRequest
 import com.example.studentreport.user.dto.UpdateUserRequest
 import com.example.studentreport.user.dto.UserStatsResponse
 import com.example.studentreport.user.service.UserServiceImpl
@@ -110,5 +112,39 @@ class UserController(
     fun getUserStats(@PathVariable id: UUID): ApiResponse<UserStatsResponse> {
         val stats = userService.getUserStats(id)
         return ApiResponse(success = true, message = "User stats retrieved", data = stats)
+    }
+
+    @GetMapping("/users/me/student-data")
+    fun getOwnStudentData(authentication: Authentication): ApiResponse<StudentDataResponse> {
+        val userId = authentication.getUserId()
+        val data = userService.getStudentData(userId)
+        return ApiResponse(success = true, message = "Student data retrieved", data = data)
+    }
+
+    @PatchMapping("/users/me/student-data")
+    fun updateOwnStudentData(
+        authentication: Authentication,
+        @RequestBody request: UpdateStudentDataRequest
+    ): ApiResponse<StudentDataResponse> {
+        val userId = authentication.getUserId()
+        val data = userService.updateStudentData(userId, request)
+        return ApiResponse(success = true, message = "Student data updated", data = data)
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users/{id}/student-data")
+    fun getStudentDataByUserId(@PathVariable id: UUID): ApiResponse<StudentDataResponse> {
+        val data = userService.getStudentData(id)
+        return ApiResponse(success = true, message = "Student data retrieved", data = data)
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/users/{id}/student-data")
+    fun updateStudentDataByUserId(
+        @PathVariable id: UUID,
+        @RequestBody request: UpdateStudentDataRequest
+    ): ApiResponse<StudentDataResponse> {
+        val data = userService.updateStudentData(id, request)
+        return ApiResponse(success = true, message = "Student data updated", data = data)
     }
 }
