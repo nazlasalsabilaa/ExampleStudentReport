@@ -7,6 +7,7 @@ import com.example.studentreport.repository.UserRepository
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -20,6 +21,7 @@ class IdempotencyFilter(
     private val idempotencyKeyRepository: IdempotencyKeyRepository,
     private val userRepository: UserRepository
 ) : OncePerRequestFilter() {
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -34,50 +36,68 @@ class IdempotencyFilter(
         }
 
         val auth = SecurityContextHolder.getContext().authentication
-        if (auth == null || !auth.isAuthenticated) {
-            filterChain.doFilter(request, response)
-            return
-        }
-
-        val userId = when (val principal = auth.principal) {
-            is UserResponse -> principal.id
-            is UUID -> principal
-            else -> {
-                filterChain.doFilter(request, response)
-                return
+        val userId = if (auth != null && auth.isAuthenticated && auth.name != "anonymousUser") {
+            when (val principal = auth.principal) {
+                is UserResponse -> principal.id
+                is UUID -> principal
+                else -> null
             }
+        } else {
+            null
         }
 
         val requestPath = request.requestURI
-        val existingKey = idempotencyKeyRepository.findByUserIdAndKey(userId, idempotencyKeyHeader)
 
-        if (existingKey != null) {
-            if (!existingKey.isExpired() && existingKey.requestPath == requestPath) {
-                response.status = existingKey.responseStatus.toInt()
-                response.contentType = "application/json"
-                response.writer.write(existingKey.responseBody)
-                return
+        var isNewRequest = false
+        try {
+            val placeholder = IdempotencyKey(
+                key = idempotencyKeyHeader,
+                requestPath = requestPath,
+                responseStatus = 0,
+                responseBody = "",
+                createdAt = Instant.now(),
+                expiresAt = Instant.now().plus(24, ChronoUnit.HOURS),
+                user = userId?.let { userRepository.getReferenceById(it) }
+            )
+            idempotencyKeyRepository.saveAndFlush(placeholder)
+            isNewRequest = true
+        } catch (e: DataIntegrityViolationException) {
+
+        }
+
+        if (!isNewRequest) {
+            val existingKey = idempotencyKeyRepository.findByKey(idempotencyKeyHeader)
+
+            if (existingKey != null) {
+                if (existingKey.responseStatus == 0.toShort()) {
+                    response.status = 409
+                    response.contentType = "application/json"
+                    response.writer.write("""{"success":false,"message":"Concurrent request processing"}""")
+                    return
+                }
+
+                if (!existingKey.isExpired() && existingKey.requestPath == requestPath) {
+                    response.status = existingKey.responseStatus.toInt()
+                    response.contentType = "application/json"
+                    response.characterEncoding = "UTF-8"
+                    response.writer.write(existingKey.responseBody)
+                    return
+                }
             }
         }
 
         val responseWrapper = ContentCachingResponseWrapper(response)
-
         filterChain.doFilter(request, responseWrapper)
 
         if (responseWrapper.status < 500) {
-            val responseBodyString = String(responseWrapper.contentAsByteArray)
+            val responseBodyString = String(responseWrapper.contentAsByteArray, Charsets.UTF_8)
+            val existingKey = idempotencyKeyRepository.findByKey(idempotencyKeyHeader)
 
-            val newKey = IdempotencyKey(
-                key = idempotencyKeyHeader,
-                userId = userId,
-                requestPath = requestPath,
-                responseStatus = responseWrapper.status.toShort(),
-                responseBody = responseBodyString,
-                createdAt = Instant.now(),
-                expiresAt = Instant.now().plus(24, ChronoUnit.HOURS),
-                user = userRepository.getReferenceById(userId)
-            )
-            idempotencyKeyRepository.save(newKey)
+            if (existingKey != null) {
+                existingKey.responseStatus = responseWrapper.status.toShort()
+                existingKey.responseBody = responseBodyString
+                idempotencyKeyRepository.save(existingKey)
+            }
         }
 
         responseWrapper.copyBodyToResponse()

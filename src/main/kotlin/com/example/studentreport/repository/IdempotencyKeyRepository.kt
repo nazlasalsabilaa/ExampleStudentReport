@@ -7,5 +7,5 @@ import java.util.UUID
 
 @Repository
 interface IdempotencyKeyRepository : JpaRepository<IdempotencyKey, Int> {
-    fun findByUserIdAndKey(userId: UUID, key: String): IdempotencyKey?
+    fun findByKey(key: String): IdempotencyKey?
 }
