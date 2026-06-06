@@ -1,5 +1,6 @@
 package com.example.studentreport.config
 
+import com.example.studentreport.security.IdempotencyFilter
 import com.example.studentreport.security.TokenAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -12,7 +13,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    val tokenAuthFilter: TokenAuthenticationFilter
+    val tokenAuthFilter: TokenAuthenticationFilter,
+    val idempotencyFilter: IdempotencyFilter
 ) {
 
     @Bean
@@ -27,6 +29,7 @@ class SecurityConfig(
                 auth.anyRequest().authenticated()
             }
             .addFilterBefore(tokenAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAfter(idempotencyFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
 }
