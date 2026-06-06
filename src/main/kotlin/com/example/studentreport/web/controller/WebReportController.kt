@@ -4,6 +4,7 @@ import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.entity.ReportStatus
 import com.example.studentreport.report.service.ReportService
 import com.example.studentreport.category.service.CategoryService
+import com.example.studentreport.report.service.ReportLogServiceImpl
 import com.example.studentreport.room.service.RoomService
 import com.example.studentreport.web.service.WebAuthHelper
 import org.springframework.data.domain.Pageable
@@ -22,7 +23,8 @@ class WebReportController(
     private val reportService: ReportService,
     private val categoryService: CategoryService,
     private val roomService: RoomService,
-    private val webAuthHelper: WebAuthHelper
+    private val webAuthHelper: WebAuthHelper,
+    private val reportLogService: ReportLogServiceImpl
 ) {
 
     private fun Authentication?.getUserIdOrNull(): UUID? {
@@ -87,7 +89,10 @@ class WebReportController(
         val isAdmin = webAuthHelper.isAdmin(auth)
 
         val report = reportService.getReportById(id, userId, isAdmin)
+        val logs = reportLogService.getLogsByReportId(id, Pageable.unpaged()).content
+
         model.addAttribute("report", report)
+        model.addAttribute("logs", logs)
 
         return "report/detail_laporan"
     }

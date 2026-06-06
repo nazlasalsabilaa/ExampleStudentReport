@@ -80,22 +80,22 @@
 
                     <div class="d-flex flex-column gap-3">
 
-<!--                        <div th:each="log : ${report?.logs}" class="bg-light p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">-->
-<!--                            <div class="d-flex justify-content-between align-items-center mb-2">-->
-<!--                                    <span class="fw-bold text-dark small" style="font-size: 0.85rem;">-->
-<!--                                        Status berubah:-->
-<!--                                        <span class="text-secondary" th:text="${log.oldStatus}">OLD</span>-->
-<!--                                        &rarr;-->
-<!--                                        <span class="text-primary" th:text="${log.newStatus}">NEW</span>-->
-<!--                                    </span>-->
-<!--                                <span class="text-muted small" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd MMM yyyy, HH:mm') : 'Tanggal'}">Tanggal</span>-->
-<!--                            </div>-->
-<!--                            <p class="text-secondary small mb-0" th:text="${log.notes ?: 'Tidak ada catatan tambahan.'}">Catatan...</p>-->
-<!--                        </div>-->
+                        <div th:each="log : ${logs}" class="bg-light p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark small" style="font-size: 0.85rem;">
+                                        Status berubah:
+                                        <span class="text-secondary" th:text="${log.oldStatus}">OLD</span>
+                                        &rarr;
+                                        <span class="text-primary" th:text="${log.newStatus}">NEW</span>
+                                    </span>
+                                <span class="text-muted small" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd MMM yyyy, HH:mm') : 'Tanggal'}">Tanggal</span>
+                            </div>
+                            <p class="text-secondary small mb-0" th:text="${log.notes ?: 'Tidak ada catatan tambahan.'}">Catatan...</p>
+                        </div>
 
-<!--                        <div th:if="${#lists.isEmpty(report?.logs)}" class="bg-light p-4 rounded text-center" style="border: 1px dashed #cbd5e1;">-->
-<!--                            <p class="text-muted small mb-0">Belum ada pembaruan status dari teknisi atau admin.</p>-->
-<!--                        </div>-->
+                        <div th:if="${#lists.isEmpty(logs)}" class="bg-light p-4 rounded text-center" style="border: 1px dashed #cbd5e1;">
+                            <p class="text-muted small mb-0">Belum ada pembaruan status dari teknisi atau admin.</p>
+                        </div>
 
                     </div>
                 </div>
