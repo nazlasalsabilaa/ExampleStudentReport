@@ -1,7 +1,6 @@
 package com.example.studentreport.upvote.controller
 
 import com.example.studentreport.auth.dto.ApiResponse
-import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.security.getUserId
 import com.example.studentreport.upvote.dto.UpvoteResponse
 import com.example.studentreport.upvote.dto.UpvoteSummaryResponse
@@ -28,7 +27,6 @@ class UpvoteController(
     @PostMapping
     fun upvoteReport(
         @PathVariable reportId: UUID,
-        @RequestHeader("Idempotency-Key", required = false) idempotencyKey: String?,
         authentication: Authentication
     ): ApiResponse<UpvoteResponse> {
         val upvote = upvoteService.upvoteReport(reportId, authentication.getUserId())

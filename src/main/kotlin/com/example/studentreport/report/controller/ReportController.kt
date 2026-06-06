@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -54,7 +53,6 @@ class ReportController(
     @PostMapping
     fun createReport(
         authentication: Authentication,
-        @RequestHeader("Idempotency-Key", required = false) idempotencyKey: String?,
         @RequestBody request: CreateReportRequest
     ): ApiResponse<ReportResponse> {
         val report = reportService.createReport(authentication.getUserId(), request)
@@ -74,7 +72,6 @@ class ReportController(
     fun updateReport(
         @PathVariable id: UUID,
         authentication: Authentication,
-        @RequestHeader("Idempotency-Key", required = false) idempotencyKey: String?,
         @RequestBody request: UpdateReportRequest
     ): ApiResponse<ReportResponse> {
         val report = reportService.updateReport(id, authentication.getUserId(), webAuthHelper.isAdmin(authentication), request)
@@ -95,7 +92,6 @@ class ReportController(
     fun updateReportStatus(
         @PathVariable id: UUID,
         authentication: Authentication,
-        @RequestHeader("Idempotency-Key", required = false) idempotencyKey: String?,
         @RequestBody request: UpdateReportStatusRequest
     ): ApiResponse<ReportResponse> {
         val report = reportService.updateReportStatus(id, authentication.getUserId(), request)

@@ -1,7 +1,6 @@
 package com.example.studentreport.report.controller
 
 import com.example.studentreport.auth.dto.ApiResponse
-import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.entity.ReportStatus
 import com.example.studentreport.report.dto.ReportLogResponse
 import com.example.studentreport.report.service.ReportLogService
@@ -9,7 +8,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
