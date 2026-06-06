@@ -17,7 +17,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/v1/reports/{reportId}/images")
-class RestReportImageController(
+class ReportImageController(
     private val reportImageService: ReportImageService,
     private val webAuthHelper: WebAuthHelper
 ) {
