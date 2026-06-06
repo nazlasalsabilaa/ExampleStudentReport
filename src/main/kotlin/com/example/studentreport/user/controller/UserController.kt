@@ -3,6 +3,7 @@ package com.example.studentreport.user.controller
 import com.example.studentreport.auth.dto.ApiResponse
 import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.entity.UserRole
+import com.example.studentreport.security.getUserId
 import com.example.studentreport.user.dto.ChangePasswordRequest
 import com.example.studentreport.user.dto.StudentDataResponse
 import com.example.studentreport.user.dto.UpdateStudentDataRequest
@@ -30,13 +31,6 @@ import java.util.UUID
 class UserController(
     private val userService: UserServiceImpl
 ) {
-    private fun Authentication.getUserId(): UUID {
-        return when (val principal = this.principal) {
-            is UserResponse -> principal.id
-            is UUID -> principal
-            else -> throw IllegalStateException("Unexpected principal type")
-        }
-    }
 
     @GetMapping("/auth/me", "/users/me")
     fun getOwnProfile(authentication: Authentication): ApiResponse<UserResponse> {

@@ -3,6 +3,7 @@ package com.example.studentreport.report.controller
 import com.example.studentreport.auth.dto.ApiResponse
 import com.example.studentreport.report.dto.ReportImageResponse
 import com.example.studentreport.report.service.ReportImageService
+import com.example.studentreport.security.getUserId
 import com.example.studentreport.web.service.WebAuthHelper
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -21,8 +22,6 @@ class ReportImageController(
     private val reportImageService: ReportImageService,
     private val webAuthHelper: WebAuthHelper
 ) {
-
-    private fun Authentication.getUserId(): UUID = this.principal as UUID
 
     @GetMapping
     fun listImages(

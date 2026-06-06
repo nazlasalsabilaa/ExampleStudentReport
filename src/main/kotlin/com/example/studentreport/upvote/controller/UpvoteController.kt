@@ -2,6 +2,7 @@ package com.example.studentreport.upvote.controller
 
 import com.example.studentreport.auth.dto.ApiResponse
 import com.example.studentreport.auth.dto.UserResponse
+import com.example.studentreport.security.getUserId
 import com.example.studentreport.upvote.dto.UpvoteResponse
 import com.example.studentreport.upvote.dto.UpvoteSummaryResponse
 import com.example.studentreport.upvote.service.UpvoteService
@@ -14,14 +15,6 @@ import java.util.UUID
 class UpvoteController(
     private val upvoteService: UpvoteService
 ) {
-
-    private fun Authentication.getUserId(): UUID {
-        return when (val principal = this.principal) {
-            is UserResponse -> principal.id
-            is UUID -> principal
-            else -> throw IllegalStateException("Unexpected principal type")
-        }
-    }
 
     @GetMapping
     fun getUpvoteSummary(

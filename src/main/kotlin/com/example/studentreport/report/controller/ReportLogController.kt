@@ -19,14 +19,6 @@ class ReportLogController(
     private val reportLogService: ReportLogService,
 ) {
 
-    private fun Authentication.getUserId(): UUID {
-        return when (val principal = this.principal) {
-            is UserResponse -> principal.id
-            is UUID -> principal
-            else -> throw IllegalStateException("Unexpected principal type")
-        }
-    }
-
     @GetMapping("/reports/{reportId}/logs")
     fun getLogsByReportId(
         @PathVariable reportId: UUID,

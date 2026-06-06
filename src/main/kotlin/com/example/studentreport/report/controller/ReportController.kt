@@ -7,6 +7,7 @@ import com.example.studentreport.report.dto.ReportResponse
 import com.example.studentreport.report.dto.UpdateReportRequest
 import com.example.studentreport.report.dto.UpdateReportStatusRequest
 import com.example.studentreport.report.service.ReportService
+import com.example.studentreport.security.getUserId
 import com.example.studentreport.web.service.WebAuthHelper
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -32,8 +33,6 @@ class ReportController(
     private val reportService: ReportService,
     private val webAuthHelper: WebAuthHelper
 ) {
-    private fun Authentication.getUserId(): UUID = this.principal as UUID
-
     @GetMapping
     fun listReports(
         authentication: Authentication,
