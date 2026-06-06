@@ -23,9 +23,9 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div class="d-flex align-items-center gap-2">
                 <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 36px; height: 36px; font-size: 0.9rem;">
-                    <span th:text="${report.user != null ? report.user.name.substring(0,1) : 'U'}">U</span>
+                    <span th:text="${report.reporter != null ? report.reporter.name.substring(0,1) : 'U'}">U</span>
                 </div>
-                <span class="fw-bold text-dark small" th:text="${report.user != null ? report.user.name : 'Nama Pelapor'}">Nama Pelapor</span>
+                <span class="fw-bold text-dark small" th:text="${report.reporter != null ? report.reporter.name : 'Nama Pelapor'}">Nama Pelapor</span>
             </div>
 
             <div class="text-end d-flex align-items-center gap-2">
@@ -52,11 +52,11 @@
         <div class="d-flex align-items-center gap-3 mb-3 text-dark fw-bold small">
             <div class="text-dark p-0 d-flex align-items-center gap-1 bg-transparent">
                 <i class="bi bi-chevron-up fw-bold" style="font-size: 1.1rem;"></i>
-                <span class="fw-bold" th:text="${report.upvotes != null ? report.upvotes.size() : '0'}">0</span>
+                <span class="fw-bold" th:text="${report.upvoteCount}">0</span>
             </div>
             <div class="d-flex align-items-center gap-1">
                 <i class="bi bi-chat" style="font-size: 1.05rem;"></i>
-                <span class="fw-bold" th:text="${report.logs != null ? report.logs.size() : '0'}">0</span>
+<!--                <span class="fw-bold" th:text="${report.logs != null ? report.logs.size() : '0'}">0</span>-->
             </div>
         </div>
 
