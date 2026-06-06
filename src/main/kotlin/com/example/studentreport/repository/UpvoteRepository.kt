@@ -7,4 +7,7 @@ import java.util.UUID
 
 @Repository
 interface UpvoteRepository : JpaRepository<Upvote, UUID> {
+    fun existsByUserIdAndReportId(userId: UUID, reportId: UUID): Boolean
+    fun findByUserIdAndReportId(userId: UUID, reportId: UUID): Upvote?
+    fun countByReportId(reportId: UUID): Int
 }
