@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import java.util.UUID
 
@@ -76,5 +77,17 @@ class WebReportController(
         model.addAttribute("categories", masterDataService.getAllCategories())
         model.addAttribute("rooms", masterDataService.getAllRooms())
         return "report/buat_laporan"
+    }
+
+    @GetMapping("/report/{id}")
+    fun detail(@PathVariable id: UUID, auth: Authentication?, model: Model): String {
+        val userId = auth.getUserIdOrNull() ?: throw IllegalStateException("Must be authenticated")
+        val isAdmin = webAuthHelper.isAdmin(auth)
+
+        val report = reportService.getReportById(id, userId, isAdmin)
+
+        model.addAttribute("report", report)
+
+        return "report/detail_laporan"
     }
 }
