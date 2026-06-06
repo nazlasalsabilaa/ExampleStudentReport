@@ -5,12 +5,10 @@ import com.example.studentreport.entity.ReportLog
 import com.example.studentreport.entity.ReportStatus
 import com.example.studentreport.report.dto.ReportLogResponse
 import com.example.studentreport.repository.ReportLogRepository
-import com.example.studentreport.repository.ReportRepository
 import jakarta.persistence.criteria.Predicate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.ZoneOffset
@@ -18,23 +16,14 @@ import java.util.UUID
 
 @Service
 class ReportLogServiceImpl(
-    private val reportLogRepository: ReportLogRepository,
-    private val reportRepository: ReportRepository
+    private val reportLogRepository: ReportLogRepository
 ) : ReportLogService {
 
     @Transactional(readOnly = true)
     override fun getLogsByReportId(
         reportId: UUID,
-        currentUserId: UUID,
-        isAdmin: Boolean,
         pageable: Pageable
     ): Page<ReportLogResponse> {
-        val report = reportRepository.findById(reportId)
-            .orElseThrow { IllegalArgumentException("Report not found") }
-
-        if (!isAdmin && report.reporterId != currentUserId) {
-            throw AccessDeniedException("Access denied: You can only view logs for your own reports")
-        }
 
         return reportLogRepository.findByReportIdOrderByCreatedAtDesc(reportId, pageable).map { it.toResponse() }
     }

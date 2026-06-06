@@ -5,7 +5,6 @@ import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.entity.ReportStatus
 import com.example.studentreport.report.dto.ReportLogResponse
 import com.example.studentreport.report.service.ReportLogService
-import com.example.studentreport.web.service.WebAuthHelper
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
@@ -18,7 +17,6 @@ import java.util.UUID
 @RequestMapping("/api/v1")
 class ReportLogController(
     private val reportLogService: ReportLogService,
-    private val webAuthHelper: WebAuthHelper
 ) {
 
     private fun Authentication.getUserId(): UUID {
@@ -32,11 +30,9 @@ class ReportLogController(
     @GetMapping("/reports/{reportId}/logs")
     fun getLogsByReportId(
         @PathVariable reportId: UUID,
-        @PageableDefault(size = 20) pageable: Pageable,
-        authentication: Authentication
+        @PageableDefault(size = 20) pageable: Pageable
     ): ApiResponse<Page<ReportLogResponse>> {
-        val isAdmin = webAuthHelper.isAdmin(authentication)
-        val logs = reportLogService.getLogsByReportId(reportId, authentication.getUserId(), isAdmin, pageable)
+        val logs = reportLogService.getLogsByReportId(reportId, pageable)
         return ApiResponse(success = true, message = "Report logs retrieved successfully", data = logs)
     }
 

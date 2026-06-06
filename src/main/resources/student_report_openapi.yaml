@@ -2281,8 +2281,8 @@ paths:
       summary: Get audit log for a specific report
       description: |
         Returns all status-change log entries for the given report, newest first.
-        - **User**: can view logs of their own reports only.
-        - **Admin**: can view logs for any report.
+        - **User**: can view logs of any reports.
+        - **Admin**: can view and edit logs for any report.
 
         Log entries are cascade-deleted when the parent report is permanently removed.
       operationId: getReportLogs
