@@ -7,4 +7,5 @@ import java.util.UUID
 
 @Repository
 interface StudentDataRepository: JpaRepository<StudentData, UUID> {
+    fun findByUserId(userId: UUID): StudentData?
 }
