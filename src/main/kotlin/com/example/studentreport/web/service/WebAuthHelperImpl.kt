@@ -1,6 +1,5 @@
-package com.example.studentreport.web.service.impl
+package com.example.studentreport.web.service
 
-import com.example.studentreport.web.service.WebAuthHelper
 import org.springframework.http.ResponseCookie
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component

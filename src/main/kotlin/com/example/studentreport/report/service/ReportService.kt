@@ -20,4 +20,6 @@ interface ReportService {
     fun updateReport(id: UUID, currentUserId: UUID, isAdmin: Boolean, request: UpdateReportRequest): ReportResponse
     fun deleteReport(id: UUID, currentUserId: UUID, isAdmin: Boolean)
     fun updateReportStatus(id: UUID, adminId: UUID, request: UpdateReportStatusRequest): ReportResponse
+    fun getAdminDashboardStats(): Map<String, Int>
+    fun getPendingReports(pageable: Pageable): Page<ReportResponse>
 }

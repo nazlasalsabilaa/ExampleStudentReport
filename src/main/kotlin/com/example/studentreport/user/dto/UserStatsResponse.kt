@@ -7,6 +7,7 @@ data class UserStatsResponse(
     val id: UUID,
     val userId: UUID,
     val reportCount: Int,
+    val inProgressReport: Int,
     val pendingReport: Int,
     val completedReport: Int,
     val rejectedReport: Int,

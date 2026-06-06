@@ -160,6 +160,24 @@ class ReportServiceImpl(
         return reportRepository.save(report).toResponse()
     }
 
+    @Transactional(readOnly = true)
+    override fun getAdminDashboardStats(): Map<String, Int> {
+        return mapOf(
+            "pendingCount" to reportRepository.countByStatus(ReportStatus.PENDING),
+            "inProgressCount" to reportRepository.countByStatus(ReportStatus.IN_PROGRESS),
+            "completedCount" to reportRepository.countByStatus(ReportStatus.COMPLETED)
+        )
+    }
+
+    @Transactional(readOnly = true)
+    override fun getPendingReports(pageable: Pageable): Page<ReportResponse> {
+        val spec = ReportSpecification.withFilters(
+            search = null, categoryId = null, roomId = null, buildingId = null,
+            status = ReportStatus.PENDING, includeDeleted = false, userId = null
+        )
+        return reportRepository.findAll(spec, pageable).map { it.toResponse() }
+    }
+
     private fun Report.toResponse(): ReportResponse {
         return ReportResponse(
             id = this.id!!,

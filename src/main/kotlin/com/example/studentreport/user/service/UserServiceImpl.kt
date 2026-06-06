@@ -97,6 +97,7 @@ class UserServiceImpl(
             id = stats.id!!,
             userId = stats.userId,
             reportCount = stats.reportCount,
+            inProgressReport = stats.inProgressReport,
             pendingReport = stats.pendingReport,
             completedReport = stats.completedReport,
             rejectedReport = stats.rejectedReport,
