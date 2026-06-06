@@ -7,8 +7,8 @@ import java.util.UUID
 @Entity
 @Table(name = "user_stats")
 data class UserStats(
-    @Id @GeneratedValue val id: UUID? = null,
-    @Column(name = "user_id") val userId: UUID,
+    @Id @GeneratedValue var id: UUID? = null,
+    @Column(name = "user_id") var userId: UUID,
     var reportCount: Int,
     var pendingReport: Int,
     var inProgressReport: Int,
