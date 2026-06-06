@@ -1,5 +1,6 @@
 package com.example.studentreport.web.controller
 
+import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.entity.ReportStatus
 import com.example.studentreport.report.service.ReportService
 import com.example.studentreport.web.service.MasterDataService
@@ -22,9 +23,12 @@ class WebReportController(
 ) {
 
     private fun Authentication?.getUserIdOrNull(): UUID? {
-        return if (this != null && this.isAuthenticated && this.principal is UUID) {
-            this.principal as UUID
-        } else null
+        if (this == null || !this.isAuthenticated) return null
+        return when (val p = this.principal) {
+            is UserResponse -> p.id
+            is UUID -> p
+            else -> null
+        }
     }
 
     @GetMapping("/feed")

@@ -1,5 +1,6 @@
 package com.example.studentreport.web.controller
 
+import com.example.studentreport.auth.dto.UserResponse
 import com.example.studentreport.web.service.DashboardService
 import com.example.studentreport.web.service.WebAuthHelper
 import org.springframework.security.core.Authentication
@@ -13,14 +14,25 @@ class WebDashboardController(
     private val dashboardService: DashboardService,
     private val webAuthHelper: WebAuthHelper
 ) {
+
+    private fun Authentication?.getUserIdOrThrow(): UUID {
+        if (this == null || !this.isAuthenticated) {
+            throw IllegalStateException("User must be authenticated")
+        }
+        return when (val p = this.principal) {
+            is UserResponse -> p.id
+            is UUID -> p
+            else -> throw IllegalStateException("Unexpected principal type")
+        }
+    }
+
     @GetMapping("/dashboard")
     fun dashboard(auth: Authentication?, model: Model): String {
         if (webAuthHelper.isAdmin(auth)) {
             return "redirect:/dashboard/admin"
         }
 
-        val userId = auth?.principal as? UUID
-            ?: throw IllegalStateException("User must be authenticated")
+        val userId = auth.getUserIdOrThrow()
 
         model.addAttribute("isAdmin", false)
         model.addAttribute("userStats", dashboardService.getUserDashboardStats(userId))
