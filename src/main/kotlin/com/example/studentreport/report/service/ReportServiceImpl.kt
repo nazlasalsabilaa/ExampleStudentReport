@@ -172,6 +172,8 @@ class ReportServiceImpl(
                 createdAt = this.user!!.createdAt.atOffset(ZoneOffset.UTC),
                 updatedAt = this.user!!.updatedAt.atOffset(ZoneOffset.UTC)
             ),
+            category = this.category!!,
+            room = this.room!!,
             categoryId = this.categoryId,
             roomId = this.roomId,
             title = this.title,
