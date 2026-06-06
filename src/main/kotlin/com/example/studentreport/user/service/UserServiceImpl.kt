@@ -1,11 +1,15 @@
 package com.example.studentreport.user.service
 
 import com.example.studentreport.auth.dto.UserResponse
+import com.example.studentreport.entity.StudentData
 import com.example.studentreport.entity.User
 import com.example.studentreport.entity.UserRole
+import com.example.studentreport.repository.StudentDataRepository
 import com.example.studentreport.repository.UserRepository
 import com.example.studentreport.repository.UserStatsRepository
 import com.example.studentreport.user.dto.ChangePasswordRequest
+import com.example.studentreport.user.dto.StudentDataResponse
+import com.example.studentreport.user.dto.UpdateStudentDataRequest
 import com.example.studentreport.user.dto.UpdateUserRequest
 import com.example.studentreport.user.dto.UserStatsResponse
 import jakarta.persistence.criteria.Predicate
@@ -23,7 +27,8 @@ import java.util.UUID
 class UserServiceImpl(
     private val userRepository: UserRepository,
     private val userStatsRepository: UserStatsRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val studentDataRepository: StudentDataRepository
 ): UserService {
 
     @Transactional(readOnly = true)
@@ -121,6 +126,28 @@ class UserServiceImpl(
         }
     }
 
+    @Transactional(readOnly = true)
+    override fun getStudentData(userId: UUID): StudentDataResponse {
+        val studentData = studentDataRepository.findByUserId(userId)
+            ?: throw IllegalArgumentException("Student data not found")
+
+        return studentData.toResponse()
+    }
+
+    @Transactional
+    override fun updateStudentData(userId: UUID, request: UpdateStudentDataRequest): StudentDataResponse {
+        val studentData = studentDataRepository.findByUserId(userId)
+            ?: throw IllegalArgumentException("Student data not found")
+
+        request.nim?.let { studentData.nim = it }
+        request.faculty?.let { studentData.faculty = it }
+        request.major?.let { studentData.major = it }
+        request.year?.let { studentData.year = it }
+
+        return studentDataRepository.save(studentData).toResponse()
+    }
+
+
     private fun User.toResponse(): UserResponse {
         return UserResponse(
             id = this.id!!,
@@ -129,6 +156,17 @@ class UserServiceImpl(
             role = this.role.name,
             createdAt = this.createdAt.atOffset(ZoneOffset.UTC),
             updatedAt = this.updatedAt.atOffset(ZoneOffset.UTC)
+        )
+    }
+
+    private fun StudentData.toResponse(): StudentDataResponse {
+        return StudentDataResponse(
+            id = this.id!!,
+            userId = this.userId,
+            nim = this.nim,
+            faculty = this.faculty,
+            major = this.major,
+            year = this.year
         )
     }
 }
