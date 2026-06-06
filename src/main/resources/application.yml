@@ -15,6 +15,12 @@ spring:
         format_sql: true
         default_batch_fetch_size: 100
 
+minio:
+  url: http://localhost:9000
+  access-key: admin
+  secret-key: admin123
+  bucket-name: student-reports
+
 app:
   security:
     mock-auth: false
