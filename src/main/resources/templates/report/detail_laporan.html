@@ -47,7 +47,7 @@
                     <div class="d-flex flex-wrap gap-4 mb-4 text-dark small fw-medium" style="font-size: 0.9rem;">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-person fs-5"></i>
-                            <span th:text="${report?.user.name ?: 'Nama User'}">Nama User</span>
+                            <span th:text="${report?.reporter.name ?: 'Nama User'}">Nama User</span>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-calendar fs-6"></i>
@@ -70,7 +70,7 @@
                 <div class="d-flex align-items-center gap-3 p-3 bg-light rounded mb-4" style="border: 1px solid #e2e8f0;">
                     <button class="btn btn-outline-primary d-flex align-items-center gap-2 px-4 py-2" style="border-radius: 8px;">
                         <i class="bi bi-chevron-up"></i>
-                        <span class="fw-bold" th:text="${report?.upvotes != null ? report.upvotes.size() : '0'}">0</span> Dukungan
+                        <span class="fw-bold" th:text="${report?.upvoteCount}">0</span> Dukungan
                     </button>
                     <span class="text-muted small">Berikan dukungan agar laporan ini diprioritaskan oleh teknisi fasilitas</span>
                 </div>
@@ -80,22 +80,22 @@
 
                     <div class="d-flex flex-column gap-3">
 
-                        <div th:each="log : ${report?.logs}" class="bg-light p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold text-dark small" style="font-size: 0.85rem;">
-                                        Status berubah:
-                                        <span class="text-secondary" th:text="${log.oldStatus}">OLD</span>
-                                        &rarr;
-                                        <span class="text-primary" th:text="${log.newStatus}">NEW</span>
-                                    </span>
-                                <span class="text-muted small" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd MMM yyyy, HH:mm') : 'Tanggal'}">Tanggal</span>
-                            </div>
-                            <p class="text-secondary small mb-0" th:text="${log.notes ?: 'Tidak ada catatan tambahan.'}">Catatan...</p>
-                        </div>
+<!--                        <div th:each="log : ${report?.logs}" class="bg-light p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">-->
+<!--                            <div class="d-flex justify-content-between align-items-center mb-2">-->
+<!--                                    <span class="fw-bold text-dark small" style="font-size: 0.85rem;">-->
+<!--                                        Status berubah:-->
+<!--                                        <span class="text-secondary" th:text="${log.oldStatus}">OLD</span>-->
+<!--                                        &rarr;-->
+<!--                                        <span class="text-primary" th:text="${log.newStatus}">NEW</span>-->
+<!--                                    </span>-->
+<!--                                <span class="text-muted small" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd MMM yyyy, HH:mm') : 'Tanggal'}">Tanggal</span>-->
+<!--                            </div>-->
+<!--                            <p class="text-secondary small mb-0" th:text="${log.notes ?: 'Tidak ada catatan tambahan.'}">Catatan...</p>-->
+<!--                        </div>-->
 
-                        <div th:if="${#lists.isEmpty(report?.logs)}" class="bg-light p-4 rounded text-center" style="border: 1px dashed #cbd5e1;">
-                            <p class="text-muted small mb-0">Belum ada pembaruan status dari teknisi atau admin.</p>
-                        </div>
+<!--                        <div th:if="${#lists.isEmpty(report?.logs)}" class="bg-light p-4 rounded text-center" style="border: 1px dashed #cbd5e1;">-->
+<!--                            <p class="text-muted small mb-0">Belum ada pembaruan status dari teknisi atau admin.</p>-->
+<!--                        </div>-->
 
                     </div>
                 </div>
