@@ -7,4 +7,5 @@ import java.util.UUID
 
 @Repository
 interface ReportImageRepository : JpaRepository<ReportImage, UUID> {
+    fun findByReportId(reportId: UUID): List<ReportImage>
 }
