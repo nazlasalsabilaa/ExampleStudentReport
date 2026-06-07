@@ -115,9 +115,10 @@
                                                 <button class="btn btn-sm btn-primary fw-medium px-3 py-1"
                                                         data-bs-toggle="modal" data-bs-target="#modalEditRoom"
                                                         th:data-id="${room.id}"
-                                                        th:data-building="${room.building?.name}"
+                                                        th:data-building="${room.building?.id}"
                                                         th:data-name="${room.name}"
-                                                        th:data-floor="${room.floor}">
+                                                        th:data-floor="${room.floor}"
+                                                        th:data-code="${room.code}">
                                                     Edit
                                                 </button>
                                                 <button class="btn btn-sm btn-danger fw-medium px-3 py-1"
