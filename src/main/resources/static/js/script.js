@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
             modalEditRoom.querySelector('#editRoomBuilding').value = building;
             modalEditRoom.querySelector('#editRoomName').value = name;
             modalEditRoom.querySelector('#editRoomFloor').value = floor;
-            modalEditRoom.querySelector('#editRoomName').value = code;
+            modalEditRoom.querySelector('#editRoomCode').value = code;
         })
     }
 
