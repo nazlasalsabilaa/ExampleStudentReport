@@ -23,7 +23,6 @@ A brief description of what this project does and who it's for
 * **API Documentation:** OpenAPI 3.0 (YAML specification included)
 ## Features
 
-- Light/dark mode toggle
 - Live previews
 - Fullscreen mode
 - Cross platform
