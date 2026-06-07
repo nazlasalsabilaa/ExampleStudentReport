@@ -45,11 +45,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const building = button.getAttribute('data-building');
             const name = button.getAttribute('data-name');
             const floor = button.getAttribute('data-floor');
+            const code = button.getAttribute('data-code');
 
             modalEditRoom.querySelector('#editRoomId').value = id;
             modalEditRoom.querySelector('#editRoomBuilding').value = building;
             modalEditRoom.querySelector('#editRoomName').value = name;
             modalEditRoom.querySelector('#editRoomFloor').value = floor;
+            modalEditRoom.querySelector('#editRoomName').value = code;
         })
     }
 
