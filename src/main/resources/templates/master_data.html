@@ -98,9 +98,10 @@
                                     <thead class="table-light">
                                     <tr>
                                         <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 5%;">No</th>
-                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 30%;">Nama Gedung</th>
-                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 30%;">Nama Ruangan</th>
-                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 20%;">Lantai</th>
+                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 20%;">Gedung</th>
+                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 20%;">Kode</th>
+                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 25%;">Ruangan</th>
+                                        <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3" style="width: 15%;">Lantai</th>
                                         <th scope="col" class="text-muted small fw-semibold text-uppercase px-4 py-3 text-end" style="width: 15%;">Aksi</th>
                                     </tr>
                                     </thead>
@@ -108,7 +109,8 @@
                                     <tr th:each="room, stat : ${rooms}">
                                         <td class="px-4 py-3 text-muted small fw-medium" th:text="${stat.count}">1</td>
                                         <td class="px-4 py-3 fw-bold text-dark small" th:text="${room.building?.name}">Gedung Fakultas Teknik Banjarmasin</td>
-                                        <td class="px-4 py-3 text-dark small" th:text="${room.name}">Ruang A-14</td>
+                                        <td class="px-4 py-3 fw-bold text-dark small" th:text="${room.code}">A-14</td>
+                                        <td class="px-4 py-3 text-dark small" th:text="${room.name}">Laboratorium Komputer Dasar</td>
                                         <td class="px-4 py-3 text-muted small" th:text="${room.floor}">Lantai 1</td>
                                         <td class="px-4 py-3 text-end text-nowrap">
                                             <div class="d-flex align-items-center justify-content-end gap-2">
@@ -131,7 +133,7 @@
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(rooms)}">
-                                        <td colspan="5" class="text-center py-4 text-muted">Belum ada ruangan yang tersedia</td>
+                                        <td colspan="6" class="text-center py-4 text-muted">Belum ada ruangan yang tersedia</td>
                                     </tr>
                                     </tbody>
                                 </table>
