@@ -84,7 +84,7 @@ class WebMasterDataController(
         @RequestParam code: String,
         @RequestParam floor: Int
     ): String {
-        roomService.updateRoom(roomId, UpdateRoomRequest(buildingId, name, floor))
+        roomService.updateRoom(roomId, UpdateRoomRequest(buildingId, name, floor, code))
         return "redirect:/master-data"
     }
 
