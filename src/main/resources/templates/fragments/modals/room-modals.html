@@ -12,15 +12,22 @@
                     <div class="modal-body px-4 py-3">
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-dark small">Nama Gedung</label>
-                            <input type="text" class="form-control py-2" name="buildingName" placeholder="Misal: Gedung Fakultas Teknik" required>
+                            <select class="form-select py-2" name="buildingId" required>
+                                <option value="" disabled selected>Pilih Gedung...</option>
+                                <option th:each="building : ${buildings}" th:value="${building.id}" th:text="${building.name}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Kode Ruangan</label>
+                            <input type="text" class="form-control py-2" name="code" placeholder="Misal: A-14" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-dark small">Nama Ruangan</label>
-                            <input type="text" class="form-control py-2" name="name" placeholder="Misal: Ruang A-14" required>
+                            <input type="text" class="form-control py-2" name="name" placeholder="Misal: Laboratorium Komputer Dasar" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-dark small">Lantai</label>
-                            <input type="text" class="form-control py-2" name="floor" placeholder="Misal: 1" required>
+                            <input type="number" class="form-control py-2" name="floor" placeholder="Misal: 1" required>
                         </div>
                     </div>
                     <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
@@ -40,11 +47,18 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="/master-data/rooms/update" method="post">
-                    <input type="hidden" id="editRoomId" name="id">
+                    <input type="hidden" id="editRoomId" name="roomId">
                     <div class="modal-body px-4 py-3">
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-dark small">Nama Gedung</label>
-                            <input type="text" class="form-control py-2" id="editRoomBuilding" name="buildingName" required>
+                            <select class="form-select py-2" id="editRoomBuilding" name="buildingId" required>
+                                <option value="" disabled>Pilih Gedung...</option>
+                                <option th:each="building : ${buildings}" th:value="${building.id}" th:text="${building.name}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Kode Ruangan</label>
+                            <input type="text" class="form-control py-2" id="editRoomCode" name="code" placeholder="Misal: A-14" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-dark small">Nama Ruangan</label>
@@ -52,7 +66,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-dark small">Lantai</label>
-                            <input type="text" class="form-control py-2" id="editRoomFloor" name="floor" required>
+                            <input type="number" class="form-control py-2" id="editRoomFloor" name="floor" required>
                         </div>
                     </div>
                     <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
@@ -74,8 +88,8 @@
                 <form action="/master-data/rooms/delete" method="post">
                     <input type="hidden" id="deleteRoomId" name="id">
                     <div class="modal-body px-4 py-3">
-                        <p class="text-dark mb-0">Apakah Anda yakin ingin menghapus kategori <span id="deleteRoomNameDisplay" class="fw-semibold"></span>?</p>
-                        <p class="text-danger small mt-2 mb-0">Tindakan ini mungkin akan memengaruhi laporan yang sudah menggunakan kategori ini.</p>
+                        <p class="text-dark mb-0">Apakah Anda yakin ingin menghapus ruangan <span id="deleteRoomNameDisplay" class="fw-semibold"></span>?</p>
+                        <p class="text-danger small mt-2 mb-0">Tindakan ini mungkin akan memengaruhi laporan yang sudah menggunakan ruangan ini.</p>
                     </div>
                     <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
                         <button type="button" class="btn btn-white border fw-semibold text-dark" data-bs-dismiss="modal">Batal</button>
