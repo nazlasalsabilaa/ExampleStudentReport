@@ -1,17 +1,29 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<header th:fragment="top-navbar" class="navbar navbar-expand bg-white px-4 py-3 border-bottom sticky-top w-100">
-    <div class="container-fluid p-0">
-        <h1 class="h5 fw-bold text-dark mb-0" style="letter-spacing: -0.2px;">Portal Fasilitas Kampus</h1>
-        <div class="ms-auto d-flex align-items-center gap-3">
-            <i class="bi bi-bell" style="font-size: 1.25rem; cursor: pointer;"></i>
-            <i class="bi bi-question-circle text-dark" style="font-size: 1.25rem; cursor: pointer;"></i>
-            <div class="bg-dark rounded-circle d-flex justify-content-center align-items-center text-white fw-bold" style="width: 28px; height: 28px; font-size: 0.75rem;">
-                <span th:text="${#strings.substring(#authentication.principal.name, 0, 1).toUpperCase()}">U</span>
+    <header th:fragment="top-navbar" class="navbar navbar-expand bg-white px-4 py-3 border-bottom sticky-top w-100">
+        <div class="container-fluid p-0">
+            <h1 class="h5 fw-bold text-dark mb-0" style="letter-spacing: -0.2px;">Portal Fasilitas Kampus</h1>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <i class="bi bi-bell" style="font-size: 1.25rem; cursor: pointer;"></i>
+                <i class="bi bi-question-circle text-dark" style="font-size: 1.25rem; cursor: pointer;"></i>
+                <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" 
+   th:href="@{/profile/admin}" style="text-decoration: none;">
+    <div class="bg-dark rounded-circle d-flex justify-content-center align-items-center text-white fw-bold" 
+         style="width: 28px; height: 28px; font-size: 0.75rem; cursor: pointer;">
+        <span th:text="${#strings.substring(#authentication.principal.name, 0, 1).toUpperCase()}">U</span>
+    </div>
+</a>
+
+<a th:if="${!#authorization.expression('hasRole(''ADMIN'')')}" 
+   th:href="@{/profile/student}" style="text-decoration: none;">
+    <div class="bg-dark rounded-circle d-flex justify-content-center align-items-center text-white fw-bold" 
+         style="width: 28px; height: 28px; font-size: 0.75rem; cursor: pointer;">
+        <span th:text="${#strings.substring(#authentication.principal.name, 0, 1).toUpperCase()}">U</span>
+    </div>
+</a>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 </body>
 </html>
