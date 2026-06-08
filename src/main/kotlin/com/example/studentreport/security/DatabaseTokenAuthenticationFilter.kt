@@ -21,6 +21,12 @@ class DatabaseTokenAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        val path = request.requestURI
+        if (!path.startsWith("/api/")) {
+            filterChain.doFilter(request, response)
+            return
+        }
+
         var token = request.getHeader("Authorization")?.removePrefix("Bearer ")
 
         if (token == null) {
@@ -28,12 +34,14 @@ class DatabaseTokenAuthenticationFilter(
         }
 
         if (token != null) {
-            val user = authService.validateSession(token)
-
-            if (user != null) {
-                val authorities = listOf(SimpleGrantedAuthority("ROLE_${user.role.uppercase()}"))
-                val authentication = UsernamePasswordAuthenticationToken(user, null, authorities)
-                SecurityContextHolder.getContext().authentication = authentication
+            try {
+                val user = authService.validateSession(token)
+                if (user != null) {
+                    val authorities = listOf(SimpleGrantedAuthority("ROLE_${user.role.uppercase()}"))
+                    val authentication = UsernamePasswordAuthenticationToken(user, null, authorities)
+                    SecurityContextHolder.getContext().authentication = authentication
+                }
+            } catch (e: Exception) {
             }
         }
 
