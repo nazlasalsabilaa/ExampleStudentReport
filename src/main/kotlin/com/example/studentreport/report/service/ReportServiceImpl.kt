@@ -20,11 +20,16 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.UUID
+import jakarta.persistence.EntityManager
+import com.example.studentreport.entity.User
+import com.example.studentreport.entity.Category
+import com.example.studentreport.entity.Room
 
 @Service
 class ReportServiceImpl(
     private val reportRepository: ReportRepository,
-    private val userStatsRepository: UserStatsRepository
+    private val userStatsRepository: UserStatsRepository,
+    private val entityManager: EntityManager
 ) : ReportService {
 
     @Transactional(readOnly = true)
@@ -51,17 +56,25 @@ class ReportServiceImpl(
     @Transactional
     override fun createReport(userId: UUID, request: CreateReportRequest): ReportResponse {
         val now = Instant.now()
+
+        val user = entityManager.getReference(User::class.java, userId)
+        val category = entityManager.getReference(Category::class.java, request.categoryId)
+        val room = entityManager.getReference(Room::class.java, request.roomId)
+
         val report = Report(
             reporterId = userId,
             categoryId = request.categoryId,
             roomId = request.roomId,
+            user = user,
+            category = category,
+            room = room,
             title = request.title,
             description = request.description ?: "",
             status = ReportStatus.PENDING,
             createdAt = now,
             updatedAt = now
         )
-        val savedReport = reportRepository.save(report)
+        val savedReport = reportRepository.saveAndFlush(report)
 
         val stats = userStatsRepository.findByUserId(userId)
         if (stats != null) {
