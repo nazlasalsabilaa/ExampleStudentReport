@@ -14,12 +14,18 @@ import org.springframework.stereotype.Component
 @ConditionalOnProperty(name = ["app.security.mock-auth"], havingValue = "true", matchIfMissing = true)
 class MockTokenAuthenticationFilter(
     private val authService: AuthService,
-): TokenAuthenticationFilter() {
+) : TokenAuthenticationFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        val path = request.requestURI
+        if (!path.startsWith("/api/")) {
+            filterChain.doFilter(request, response)
+            return
+        }
+
         var token = request.getHeader("Authorization")?.removePrefix("Bearer ")
 
         if (token == null) {
@@ -27,12 +33,14 @@ class MockTokenAuthenticationFilter(
         }
 
         if (token != null) {
-            val user = authService.validateSession(token)
-
-            if (user != null) {
-                val authorities = listOf(SimpleGrantedAuthority("ROLE_${user.role.uppercase()}"))
-                val authentication = UsernamePasswordAuthenticationToken(user.id, null, authorities)
-                SecurityContextHolder.getContext().authentication = authentication
+            try {
+                val user = authService.validateSession(token)
+                if (user != null) {
+                    val authorities = listOf(SimpleGrantedAuthority("ROLE_${user.role.uppercase()}"))
+                    val authentication = UsernamePasswordAuthenticationToken(user.id, null, authorities)
+                    SecurityContextHolder.getContext().authentication = authentication
+                }
+            } catch (e: Exception) {
             }
         }
         filterChain.doFilter(request, response)
