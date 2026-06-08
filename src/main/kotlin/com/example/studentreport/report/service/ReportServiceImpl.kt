@@ -154,9 +154,13 @@ class ReportServiceImpl(
         report.status = newStatus
         report.updatedAt = Instant.now()
 
+        val adminUser = entityManager.getReference(User::class.java, adminId)
+
         val log = ReportLog(
             adminId = adminId,
             reportId = id,
+            admin = adminUser,
+            report = report,
             oldStatus = oldStatus,
             newStatus = newStatus,
             createdAt = Instant.now(),
