@@ -3,8 +3,15 @@
 <body>
 <div th:fragment="report-card-simple(report)" class="col-12 col-md-4">
     <a th:href="@{/report/{id}(id=${report.id ?: '1'})}" class="card h-100 border-0 bg-light p-2 text-decoration-none text-dark" style="border-radius: 8px; transition: transform 0.2s; cursor: pointer;">
-        <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center" style="height: 140px;">
-            <i class="bi bi-image text-secondary" style="font-size: 2.5rem; opacity: 0.7;"></i>
+
+        <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center overflow-hidden" style="height: 140px;">
+            <img th:if="${report.images != null && !report.images.isEmpty()}"
+                 th:src="${report.images[0].imageUrl}"
+                 class="w-100 h-100 object-fit-cover"
+                 alt="Thumbnail Laporan">
+
+            <i th:unless="${report.images != null && !report.images.isEmpty()}"
+               class="bi bi-image text-secondary" style="font-size: 2.5rem; opacity: 0.7;"></i>
         </div>
         <div class="card-body px-1 py-3 text-center">
             <h4 class="h6 fw-extrabold text-dark mb-2 text-uppercase" style="letter-spacing: 0.5px;" th:text="${report.title ?: 'AC'}">NAMA FASILITAS</h4>
@@ -43,10 +50,19 @@
             </div>
         </div>
 
-        <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center mb-3" style="height: 240px; border-radius: 12px;">
-            <img th:if="${report.images != null && !report.images.isEmpty()}" th:src="${report.images[0].imageUrl}" class="w-100 h-100 object-fit-cover rounded" style="border-radius: 12px;" alt="Foto Kerusakan">
+        <div class="d-flex gap-2 overflow-auto" style="height: 240px; border-radius: 12px;">
+            <th:block th:if="${report.images != null && !report.images.isEmpty()}">
+                <img th:each="img : ${report.images}"
+                     th:src="${img.imageUrl}"
+                     class="h-100 object-fit-cover rounded"
+                     style="border-radius: 12px; flex: 0 0 auto; width: auto;"
+                     alt="Foto Kerusakan">
+            </th:block>
 
-            <i th:unless="${report.images != null && !report.images.isEmpty()}" class="bi bi-image text-secondary" style="font-size: 3.5rem; opacity: 0.7;"></i>
+            <div th:unless="${report.images != null && !report.images.isEmpty()}"
+                class="w-100 bg-secondary-subtle d-flex align-items-center justify-content-center">
+                <i class="bi bi-image text-secondary" style="font-size: 3.5rem; opacity: 0.7;"></i>
+            </div>
         </div>
 
         <div class="d-flex align-items-center gap-3 mb-3 text-dark fw-bold small">
