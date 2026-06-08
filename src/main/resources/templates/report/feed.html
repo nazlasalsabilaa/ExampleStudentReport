@@ -29,29 +29,31 @@
                     <p class="text-secondary small mb-0">Pantau semua laporan kerusakan fasilitas kampus</p>
                 </div>
 
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <div class="position-relative" style="min-width: 240px;">
-                        <input type="text" class="form-control form-control-sm ps-5 py-2 bg-white border-0 shadow-sm" style="border-radius: 8px;" placeholder="Cari laporan...">
-                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3" style="color: #64748B;"></i>
-                    </div>
+                <form action="/feed" method="get" id="searchFilterForm" class="d-flex align-items-center gap-2 flex-wrap">
 
+                    <div class="position-relative" style="min-width: 240px;">
+                        <input type="text" name="search" th:value="${currentSearch}" class="form-control form-control-sm ps-5 py-2 bg-white border-0 shadow-sm" style="border-radius: 8px;" placeholder="Cari laporan...">
+                        <button type="submit" class="btn btn-link position-absolute top-50 start-0 translate-middle-y ms-1 p-0 border-0" style="color: #64748B; box-shadow: none;">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
                     <div class="bg-white p-1 shadow-sm d-flex gap-2 align-items-center" style="border-radius: 8px;">
                         <span class="text-secondary small fw-semibold px-2 d-flex align-items-center gap-1">
                             <i class="bi bi-funnel"></i>
                             Filter
                         </span>
 
-                        <select class="form-select form-select-sm border-0 bg-light text-muted small" style="min-width: 140px;">
-                            <option selected value="">Semua Kategori</option>
-                            <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">Kategori</option>
+                        <select name="categoryId" class="form-select form-select-sm border-0 bg-light text-muted small" style="min-width: 140px;" onchange="document.getElementById('searchFilterForm').submit();">
+                            <option value="">Semua Kategori</option>
+                            <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}" th:selected="${category.id == currentCategory}"></option>
                         </select>
 
-                        <select class="form-select form-select-sm border-0 bg-light text-muted small" style="min-width: 160px;">
-                            <option selected value="">Semua Lokasi</option>
-                            <option th:each="room : ${rooms}" th:value="${room.id}" th:text="${room.building != null ? room.building.name + ' - ' : ''} + ${room.name}">Lokasi</option>
+                        <select name="roomId" class="form-select form-select-sm border-0 bg-light text-muted small" style="min-width: 160px;" onchange="document.getElementById('searchFilterForm').submit();">
+                            <option value="">Semua Lokasi</option>
+                            <option th:each="room : ${rooms}" th:value="${room.id}" th:text="${room.building != null ? room.building.name + ' - ' : ''} + ${room.name}" th:selected="${room.id == currentRoom}"></option>
                         </select>
                     </div>
-                </div>
+                </form>
             </div>
 
             <div class="row">
