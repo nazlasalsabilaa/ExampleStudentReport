@@ -5,6 +5,7 @@ import com.example.studentreport.report.dto.ReportImageResponse
 import com.example.studentreport.repository.ReportImageRepository
 import com.example.studentreport.repository.ReportRepository
 import com.example.studentreport.storage.service.StorageService
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -19,9 +20,11 @@ class ReportImageServiceImpl(
     private val storageService: StorageService
 ) : ReportImageService {
 
-    private val allowedContentTypes = listOf("image/jpeg", "image/png", "image/svg+xml")
+    private val allowedContentTypes = listOf("image/jpeg", "image/png", "image/webp")
     private val maxFileSize = 5 * 1024 * 1024
+    private val maxImagesPerReport = 3
 
+    @Transactional(readOnly = true)
     override fun getImagesByReportId(
         reportId: UUID,
         currentUserId: UUID,
@@ -37,6 +40,7 @@ class ReportImageServiceImpl(
         return reportImageRepository.findByReportId(reportId).map { it.toResponse() }
     }
 
+    @Transactional
     override fun uploadImages(
         reportId: UUID,
         currentUserId: UUID,
@@ -48,6 +52,11 @@ class ReportImageServiceImpl(
 
         if (!isAdmin && report.reporterId != currentUserId) {
             throw AccessDeniedException("Not authorized to upload images for this report")
+        }
+
+        val currentImageCount = reportImageRepository.findByReportId(reportId).size
+        if (currentImageCount + files.size > maxImagesPerReport) {
+            throw IllegalArgumentException("Maximum $maxImagesPerReport images per report. Currently there are $currentImageCount images.")
         }
 
         val savedImages = files.map { file ->
@@ -71,6 +80,7 @@ class ReportImageServiceImpl(
         return savedImages.map { it.toResponse() }
     }
 
+    @Transactional
     override fun deleteImage(
         reportId: UUID,
         imageId: UUID,
